@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting #-}
 
-module SeqCalc (At : Set) where
+module SeqCalc where
 
 open import Data.Maybe
 open import Data.List
@@ -10,7 +10,7 @@ open import Data.Empty
 open import Data.Product
 open import Relation.Binary.PropositionalEquality hiding (_≗_)
 open ≡-Reasoning
-open import Formulae At
+open import Formulae
 open import Utilities
 -- 
 
@@ -161,8 +161,12 @@ data _≗_ : {S : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A 
   ⊸r : ∀{S}{Γ}{A}{C}{f g : S ∣ Γ ++ A ∷ [] ⊢ C} → f ≗ g → ⊸r f ≗ ⊸r g
   ⊸l : ∀{Γ}{Δ}{A}{B}{C}{f g : nothing ∣ Γ ⊢ A}{f' g' : just B ∣ Δ ⊢ C}
     → f ≗ g → f' ≗ g' → ⊸l f f' ≗ ⊸l g g'
+  ⊗l : ∀{Γ}{A}{B}{C}{f g : just A ∣ B ∷ Γ ⊢ C} → f ≗ g → ⊗l f ≗ ⊗l g
+  ⊗r : ∀{S}{Γ}{Δ}{A}{B}{f g : S ∣ Γ ⊢ A}{f' g' : nothing ∣ Δ ⊢ B}
+    → f ≗ g → f' ≗ g' → ⊗r f f' ≗ ⊗r g g'
   axI : ax ≗ Il Ir
   ax⊸ : {A B : Fma} → ax {A ⊸ B} ≗ ⊸r (⊸l (pass ax) ax)
+  ax⊗ : {A B : Fma} → ax {A ⊗ B} ≗ ⊗l (⊗r ax (pass ax))
   ⊸rpass : {Γ : Cxt}{A B C : Fma} {f : just A ∣ Γ ++ B ∷ [] ⊢ C}
     → ⊸r (pass f) ≗ pass (⊸r f)
   ⊸rIl : {Γ : Cxt}{B C : Fma} {f : nothing ∣ Γ ++ B ∷ [] ⊢ C}
@@ -170,6 +174,15 @@ data _≗_ : {S : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A 
   ⊸r⊸l : {Γ Δ : Cxt}{A B C D : Fma}
     → {f : nothing ∣ Γ ⊢ A}{g : just B ∣ Δ ++ C ∷ [] ⊢ D}
     → ⊸r {Γ = Γ ++ Δ} (⊸l f g) ≗ ⊸l f (⊸r g)
+  ⊗rpass : {Γ Δ : Cxt}{A A' B : Fma}
+    → {f : just A' ∣ Γ ⊢ A}{g : nothing ∣ Δ ⊢ B}
+    → ⊗r (pass f) g ≗ pass (⊗r f g)
+  ⊗rIl : {Γ Δ : Cxt}{A B : Fma}
+    → {f : nothing ∣ Γ ⊢ A}{g : nothing ∣ Δ ⊢ B}
+    → ⊗r (Il f) g ≗ Il (⊗r f g)
+  ⊗r⊗l : {Γ Δ : Cxt}{A A' B B' : Fma}
+    → {f : just A' ∣ B' ∷ Γ ⊢ A}{g : nothing ∣ Δ ⊢ B}
+    → ⊗r (⊗l f) g ≗ ⊗l (⊗r f g)
   ex : ∀{S Γ Δ A B C}{f g : S ∣ Γ ++ A ∷ B ∷ Δ ⊢ C}
     → f ≗ g → ex f ≗ ex g
   exex : {S : Stp}{Γ₁ Γ₂ Γ₃ : Cxt} {A B A' B' C : Fma}
@@ -191,6 +204,15 @@ data _≗_ : {S : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A 
   ex⊸l₂ : {Γ Δ₁ Δ₂ : Cxt}{A B A' B' C : Fma}
     → {f : nothing ∣ Γ ⊢ A'}{g : just B' ∣ Δ₁ ++ A ∷ B ∷ Δ₂ ⊢ C}
     → ex {Γ = Γ ++ Δ₁} (⊸l f g) ≗ ⊸l f (ex g)
+  ex⊗l : {Γ Δ : Cxt}{A' B' A B C : Fma}
+    → {f : just A' ∣ B' ∷ Γ ++ A ∷ B ∷ Δ ⊢ C}
+    → ex (⊗l f) ≗ ⊗l (ex {Γ = B' ∷ Γ} f)
+  ex⊗r₁ : {S : Stp}{Γ₁ Γ₂ Δ : Cxt}{A B C C' : Fma}
+    → {f : S ∣ Γ₁ ++ A ∷ B ∷ Γ₂ ⊢ C}{g : nothing ∣ Δ ⊢ C'}
+    → ex (⊗r f g) ≗ ⊗r (ex f) g
+  ex⊗r₂ : {S : Stp}{Γ Δ₁ Δ₂ : Cxt}{A B C C' : Fma}
+    → {f : S ∣ Γ ⊢ C}{g : nothing ∣ Δ₁ ++ A ∷ B ∷ Δ₂ ⊢ C'}
+    → ex {Γ = Γ ++ Δ₁} (⊗r f g) ≗ ⊗r f (ex g)
   ex-iso : ∀{S Γ Δ A B C} {f : S ∣ Γ ++ A ∷ B ∷ Δ ⊢ C}
     → ex {Γ = Γ} (ex {Γ = Γ} f) ≗ f
   ex-braid : ∀{S Γ Δ A B C D} {f : S ∣ Γ ++ A ∷ B ∷ C ∷ Δ ⊢ D}
