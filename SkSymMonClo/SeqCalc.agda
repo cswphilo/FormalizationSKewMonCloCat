@@ -174,6 +174,8 @@ data _≗_ : {S : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A 
   ⊸r⊸l : {Γ Δ : Cxt}{A B C D : Fma}
     → {f : nothing ∣ Γ ⊢ A}{g : just B ∣ Δ ++ C ∷ [] ⊢ D}
     → ⊸r {Γ = Γ ++ Δ} (⊸l f g) ≗ ⊸l f (⊸r g)
+  ⊸r⊗l : {Γ : Cxt} {A B C D : Fma} {f : just A ∣ B ∷ Γ ++ D ∷ [] ⊢ C}
+          → ⊸r (⊗l f) ≗ ⊗l (⊸r f)
   ⊗rpass : {Γ Δ : Cxt}{A A' B : Fma}
     → {f : just A' ∣ Γ ⊢ A}{g : nothing ∣ Δ ⊢ B}
     → ⊗r (pass f) g ≗ pass (⊗r f g)
@@ -183,6 +185,9 @@ data _≗_ : {S : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A 
   ⊗r⊗l : {Γ Δ : Cxt}{A A' B B' : Fma}
     → {f : just A' ∣ B' ∷ Γ ⊢ A}{g : nothing ∣ Δ ⊢ B}
     → ⊗r (⊗l f) g ≗ ⊗l (⊗r f g)
+  ⊗r⊸l : {Γ Δ Λ : Cxt} {A B C D : Fma} → 
+         {f : - ∣ Γ ⊢ A} {g : just B ∣ Δ ⊢ C} {h : - ∣ Λ ⊢ D}
+         → ⊗r (⊸l f g) h ≗ ⊸l f (⊗r g h)
   ex : ∀{S Γ Δ A B C}{f g : S ∣ Γ ++ A ∷ B ∷ Δ ⊢ C}
     → f ≗ g → ex f ≗ ex g
   exex : {S : Stp}{Γ₁ Γ₂ Γ₃ : Cxt} {A B A' B' C : Fma}
