@@ -322,15 +322,34 @@ ex-c Φ f = ex-c' Φ f refl
 ⊸r-ex-c f = ⊸r (ex f refl refl)
 
 -- ⊗l rule in phase c
+⊗l-ri : {Γ' Γ₀ Γ₁ : Cxt} {A B C : Fma} (f : just A ∣ Γ' ⊢ri C) (eq : Γ' ≡ Γ₀ ++ B ∷ Γ₁) → 
+            just (A ⊗ B) ∣ Γ₀ ++ Γ₁ ⊢ri C
+⊗l-ri (⊸r (ex (ex {Γ = x ∷ Γ} f refl refl) eq' eq₁)) eq = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
+⊗l-ri {Γ₀ = Γ₀} {Γ₁} (⊸r (ex {Δ = Δ} {Λ} (ri2c f) refl refl)) eq with cases++ Γ₀ Δ Γ₁ Λ eq
+⊗l-ri {Γ₀ = Γ₀} {.(Ω₀ ++ Λ)} (⊸r (ex {Δ = .(Γ₀ ++ _ ∷ Ω₀)} {Λ} (ri2c f) refl refl)) refl | inj₁ (Ω₀ , refl , refl) = ⊸r (ex {Δ = Γ₀ ++ Ω₀} {Λ} (ri2c (⊗l-ri f refl)) refl refl)
+⊗l-ri {Γ₀ = .(Δ ++ Ω₀)} {Γ₁} (⊸r (ex {Δ = Δ} {.(Ω₀ ++ _ ∷ Γ₁)} (ri2c f) refl refl)) refl | inj₂ (Ω₀ , refl , refl) = ⊸r (ex {Δ = Δ} {Ω₀ ++ Γ₁} (ri2c (⊗l-ri {Γ₀ = Δ ++ _ ∷ Ω₀} f refl)) refl refl)
+⊗l-ri {Γ₀ = Γ₀} (li2ri {C = C} f) refl = li2ri {C = C} (⊗l (ex {Δ = Γ₀} (ri2c (li2ri f)) refl refl))
+
 ⊗l-c' : ∀ {Γ Γ' Δ A B C} (f : just A ∣ Γ' ؛ Δ ⊢c C) (p : Γ' ≡ B ∷ Γ) → 
                              just (A ⊗ B) ∣ Γ ؛ Δ ⊢c C
 ⊗l-c' (ex {Γ = []} (ex {Γ = Γ} f eq'' eq₂) eq' eq) eq₁ = ⊥-elim ([]disj∷ Γ eq'')
-⊗l-c' (ex {Γ = []} (ri2c (⊸r (ex (ex {Γ = x ∷ Γ} f refl refl) eq'' eq₁))) eq eq') eq₀ = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq'' )))
-⊗l-c' (ex {Γ = []} {Δ₁} {Λ₁} (ri2c (⊸r (ex {Δ = Δ} {Λ} (ri2c f) refl refl))) refl eq') refl with cases++ Δ₁ Δ Λ₁ Λ eq'
-... | inj₁ (Δ₀ , refl , refl) = ri2c (⊸r (ex {Δ = Δ₁ ++ Δ₀} {Λ} (⊗l-c' (ex {Δ = Δ₁} {Δ₀ ++ _ ∷ Λ} (ri2c f) refl refl) refl) refl refl))
-... | inj₂ (Δ₀ , refl , refl) = ri2c (⊸r (ex {Δ = Δ} {Δ₀ ++ Λ₁} (⊗l-c' (ex {Δ = Δ ++ _ ∷ Δ₀} {Λ₁} (ri2c f) refl refl) refl) refl refl))
-⊗l-c' (ex {Γ = []} {Δ} {Λ} (ri2c (li2ri {C = C} f)) refl refl) refl = ri2c (li2ri {C = C} (⊗l (ex {Γ = []} {Δ} {Λ} (ri2c (li2ri f)) refl refl)))
+⊗l-c' (ex {Γ = []} (ri2c f) refl eq') refl = ri2c (⊗l-ri f eq')
+--   ⊸r (ex (ex {Γ = x ∷ Γ} f refl refl) eq'' eq₁))) eq eq') eq₀ = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq'' )))
+-- ⊗l-c' (ex {Γ = []} {Δ₁} {Λ₁} (ri2c (⊸r (ex {Δ = Δ} {Λ} (ri2c f) refl refl))) refl eq') refl with cases++ Δ₁ Δ Λ₁ Λ eq'
+-- ... | inj₁ (Δ₀ , refl , refl) = ri2c (⊸r (ex {Δ = Δ₁ ++ Δ₀} {Λ} (⊗l-c' (ex {Δ = Δ₁} {Δ₀ ++ _ ∷ Λ} (ri2c f) refl refl) refl) refl refl))
+-- ... | inj₂ (Δ₀ , refl , refl) = ri2c (⊸r (ex {Δ = Δ} {Δ₀ ++ Λ₁} (⊗l-c' (ex {Δ = Δ ++ _ ∷ Δ₀} {Λ₁} (ri2c f) refl refl) refl) refl refl))
+-- ⊗l-c' (ex {Γ = []} {Δ} {Λ} (ri2c (li2ri {C = C} f)) refl refl) refl = ri2c (li2ri {C = C} (⊗l (ex {Γ = []} {Δ} {Λ} (ri2c (li2ri f)) refl refl)))
 ⊗l-c' (ex {Γ = A' ∷ Φ} f refl refl) refl = ex (⊗l-c' f refl) refl refl
+
+-- ⊗l-c' : ∀ {Γ Γ' Δ A B C} (f : just A ∣ Γ' ؛ Δ ⊢c C) (p : Γ' ≡ B ∷ Γ) → 
+--                              just (A ⊗ B) ∣ Γ ؛ Δ ⊢c C
+-- ⊗l-c' (ex {Γ = []} (ex {Γ = Γ} f eq'' eq₂) eq' eq) eq₁ = ⊥-elim ([]disj∷ Γ eq'')
+-- ⊗l-c' (ex {Γ = []} (ri2c (⊸r (ex (ex {Γ = x ∷ Γ} f refl refl) eq'' eq₁))) eq eq') eq₀ = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq'' )))
+-- ⊗l-c' (ex {Γ = []} {Δ₁} {Λ₁} (ri2c (⊸r (ex {Δ = Δ} {Λ} (ri2c f) refl refl))) refl eq') refl with cases++ Δ₁ Δ Λ₁ Λ eq'
+-- ... | inj₁ (Δ₀ , refl , refl) = ri2c (⊸r (ex {Δ = Δ₁ ++ Δ₀} {Λ} (⊗l-c' (ex {Δ = Δ₁} {Δ₀ ++ _ ∷ Λ} (ri2c f) refl refl) refl) refl refl))
+-- ... | inj₂ (Δ₀ , refl , refl) = ri2c (⊸r (ex {Δ = Δ} {Δ₀ ++ Λ₁} (⊗l-c' (ex {Δ = Δ ++ _ ∷ Δ₀} {Λ₁} (ri2c f) refl refl) refl) refl refl))
+-- ⊗l-c' (ex {Γ = []} {Δ} {Λ} (ri2c (li2ri {C = C} f)) refl refl) refl = ri2c (li2ri {C = C} (⊗l (ex {Γ = []} {Δ} {Λ} (ri2c (li2ri f)) refl refl)))
+-- ⊗l-c' (ex {Γ = A' ∷ Φ} f refl refl) refl = ex (⊗l-c' f refl) refl refl
 
 
 
@@ -371,7 +390,7 @@ pass-c' {A = A'} (ex {Γ = Γ} {Δ} {Λ} {A = A} f refl refl) eq = ex {Γ = A' �
 pass-c' {Δ = Δ} {A = A} (ri2c (⊸r f)) refl = ex {Γ = []} {Δ = []} (ri2c (pass-ri (⊸r f))) refl refl
 pass-c' {Δ = Δ} {A = A} (ri2c (li2ri f)) refl = ex {Γ = []} {Δ = []} (ri2c (li2ri (p2li (pass f)))) refl refl
 pass-ri {Γ = .(_)} {A = A'} (⊸r {A = A} (ex (ex {Γ = x ∷ Γ} f refl refl) eq' eq)) = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
-pass-ri {Γ = .(_)} {A = A'} (⊸r {A = A} (ex {Δ = Δ} {Λ = Λ} (ri2c f) refl refl)) = ⊸r (ex {Γ = []} {Δ = A' ∷ Δ} {Λ = Λ} (ri2c (pass-ri f)) refl refl)  -- ⊸r (act [] (ex-c [] (pass-c f refl)) refl refl)
+pass-ri {Γ = .(_)} {A = A'} (⊸r {A = A} (ex {Δ = Δ} {Λ = Λ} (ri2c f) refl refl)) = ⊸r (ex {Γ = []} {Δ = A' ∷ Δ} {Λ = Λ} (ri2c (pass-ri f)) refl refl) 
 pass-ri (li2ri f) = li2ri (p2li (pass f))
 
 pass-c f = pass-c' f refl
@@ -440,18 +459,24 @@ isInter-end[] isInter[] = refl
 ... | refl = []right
 ∷left' (x ∷ ys) eq = ∷left eq
 
+
 ∷right' : {A : Set} → {x : A} → {ys zs : List A} → (xs : List A) → isInter xs ys zs → isInter xs (x ∷ ys) (x ∷ zs)
-∷right' xs eq = isInter-sym (∷left' xs (isInter-sym eq))
+∷right' [] eq with isInter-right[] eq
+... | refl = []left
+∷right' (x ∷ xs) eq = ∷right eq
 
 
 isInter++r : {X : Set} → {xs' ys' zs' : List X} → (ys : List X) → isInter xs' ys' zs' → isInter (xs') (ys ++ ys') (ys ++ zs')
 isInter++r [] eq = eq
-isInter++r {xs' = []} (x ∷ ys) eq with isInter-left[] (isInter-sym eq)
+isInter++r {xs' = []} (x ∷ ys) eq with isInter-right[] eq
 ... | refl = []left
 isInter++r {xs' = x₁ ∷ xs'} (x ∷ ys) eq = ∷right (isInter++r ys eq)
 
 isInter++l : {X : Set} → {xs' ys' zs' : List X} → (ys : List X) → isInter xs' ys' zs' → isInter (ys ++ xs') (ys') (ys ++ zs')
-isInter++l ys inTeq = isInter-sym (isInter++r ys (isInter-sym inTeq))
+isInter++l [] inTeq = inTeq
+isInter++l {ys' = []} (x ∷ ys) inTeq with isInter-left[] inTeq
+... | refl = []right
+isInter++l {ys' = x₁ ∷ ys'} (x ∷ ys) inTeq = ∷left (isInter++l ys inTeq)
 
 isInter-split : {X : Set} → {xs ys₀ ys₁ zs ys : List X} → {y : X} → (ys ≡ ys₀ ++ y ∷ ys₁) → isInter xs ys zs → 
              Σ (List X) (λ xs₀ → Σ (List X) (λ xs₁ → Σ (List X) (λ zs₀ → Σ (List X) (λ zs₁ → 
@@ -484,7 +509,7 @@ isInter-split-left eq inTeq with isInter-split eq (isInter-sym inTeq)
 isInter++ : {X : Set} → {xs xs' ys ys' zs zs' : List X} → isInter xs ys zs → isInter xs' ys' zs' → isInter (xs ++ xs') (ys ++ ys') (zs ++ zs')
 isInter++ isInter[] eq' = eq'
 isInter++ ([]left {x} {xs}) eq' = isInter++r (x ∷ xs) eq'
-isInter++ ([]right {x} {xs}) eq' = isInter-sym (isInter++r ((x ∷ xs)) (isInter-sym eq'))
+isInter++ ([]right {x} {xs}) eq' = isInter++l (x ∷ xs) eq'
 isInter++ (∷left eq) eq' = ∷left (isInter++ eq eq')
 isInter++ (∷right eq) eq' = ∷right (isInter++ eq eq')
 
@@ -505,7 +530,7 @@ isInter++? (x ∷ zs₀) zs₁ refl (∷left inTeq) with isInter++? zs₀ zs₁ 
 ... | xs₀' , xs₁' , ys₀' , ys₁' , refl , eq₁ , inTeq' , inTeq'' = (x ∷ xs₀') , xs₁' , ys₀' , ys₁' , refl , eq₁ , ∷left' ys₀' inTeq' , inTeq''
 isInter++? [] (x ∷ zs₁) refl (∷right {x₁} {xs = xs} {ys} inTeq) = [] , (x₁ ∷ xs) , [] , (x ∷ ys) , refl , refl , isInter[] , ∷right inTeq
 isInter++? (x ∷ zs₀) zs₁ refl (∷right inTeq) with isInter++? zs₀ zs₁ refl inTeq
-... | xs₀' , xs₁' , ys₀' , ys₁' , eq₀ , refl , inTeq' , inTeq'' = xs₀' , xs₁' , (x ∷ ys₀') , ys₁' , eq₀ , refl , isInter-sym (∷left' xs₀' (isInter-sym inTeq')) , inTeq''
+... | xs₀' , xs₁' , ys₀' , ys₁' , eq₀ , refl , inTeq' , inTeq'' = xs₀' , xs₁' , (x ∷ ys₀') , ys₁' , eq₀ , refl , ∷right' xs₀' inTeq' , inTeq''
 
 
 infix 3 _↭'_
@@ -634,6 +659,8 @@ gen⊗r-f : {S : Irr} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A : Pos}
 
 ⊗r-c-ri {Δ = Δ₁} (ex {Δ = Δ} {Λ} f refl refl) g = ex {Δ = Δ} {Λ ++ Δ₁} (⊗r-c-ri f g) refl refl
 ⊗r-c-ri {Γ = Γ} {Δ} (ri2c f) g = ri2c (li2ri (gen⊗r-ri {Γ = Γ} {Γ} {[]} [] {Δ} f g ([]right' Γ) (empty refl)))
+-- ⊗r-c-ri {Γ = []} {Δ} (ri2c f) g = ri2c (li2ri (gen⊗r-ri {Γ = []} {[]} {[]} [] {Δ} f g isInter[] (empty refl)))
+-- ⊗r-c-ri {Γ = A ∷ Γ} {Δ} (ri2c f) g = ri2c (li2ri (gen⊗r-ri {Γ = A ∷ Γ} {A ∷ Γ} {[]} [] {Δ} f g []right (empty refl))) -- ([]right' Γ)
 
 gen⊗r-ri Γ₁ (⊸r (ex (ex {Γ = x ∷ Γ} f refl refl) eq' eq₁)) g eq peq = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
 gen⊗r-ri Γ₁ {Δ = Δ₁} (⊸r (ex {Δ = Δ} {Λ} (ri2c f) refl refl)) g eq peq with isInter++? Δ Λ refl eq
@@ -683,7 +710,7 @@ gen⊗r-f {Γ₀ = Γ₀} Γ₁ (⊗r {S = S} {Γ} {Δ} f f') g eq peq with isIn
           (f : S ∣ Ω ؛ [] ⊢c A) (g : - ∣ Γ ؛ Δ ⊢c B) → 
           ----------------------------------------------
              S ∣ Ω ++ Γ ؛ Δ ⊢c A ⊗ B
-⊗r-c f (ex {Δ = Δ} {Λ} g refl refl) = ex {Δ = Δ} {Λ} (⊗r-c f g) refl refl
+⊗r-c f (ex g refl refl) = ex (⊗r-c f g) refl refl
 ⊗r-c f (ri2c g) = ⊗r-c-ri f g
 
 -- ⊗r in phase li
