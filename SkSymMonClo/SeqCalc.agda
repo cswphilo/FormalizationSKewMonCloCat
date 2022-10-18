@@ -12,6 +12,7 @@ open import Relation.Binary.PropositionalEquality hiding (_≗_)
 open ≡-Reasoning
 open import Formulae
 open import Utilities
+open import isInter
 -- 
 
 -- Sequent Calculus
@@ -94,6 +95,37 @@ Il-1 (ex f) = ex (Il-1 f)
 ⊸r-1 (⊸l f f₁) = ⊸l f (⊸r-1 f₁)
 ⊸r-1 (⊸r f) = f
 ⊸r-1 {A = A} (ex {Γ = Γ} {Δ} f) = ex (⊸r-1 {Γ = Γ ++ _ ∷ _ ∷ Δ} f)
+
+-- ⊸r⋆
+
+
+-- isInter-split-r ys₀ ys₁ eq isInter[] with []++ {xs = ys₀} {ys₁} eq 
+-- isInter-split-r .[] .[] refl isInter[] | refl , refl = [] , [] , [] , [] , isInter[] , isInter[] , refl , refl , refl
+-- isInter-split-r [] (x ∷ ys₁) refl []left = [] , [] , [] , x ∷ ys₁ , isInter[] , []left , refl , refl , refl
+-- isInter-split-r (x ∷ ys₀) [] refl []left = [] , [] , x ∷ ys₀ , [] , []left , isInter[] , refl , refl , refl
+-- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl []left = [] , [] , x ∷ ys₀ , x₁ ∷ ys₁ , []left , []left , refl , refl , refl
+-- isInter-split-r ys₀ ys₁ eq []right with []++ {xs = ys₀} {ys₁} eq 
+-- isInter-split-r .[] .[] refl ([]right {x = x} {xs = xs}) | refl , refl = 
+--   x ∷ xs , [] , x ∷ xs , [] , []right , isInter[] , refl , refl , refl
+-- isInter-split-r [] (x ∷ ys₁) refl (∷left {x = x₁} {xs = xs} {zs = zs} inTeq) = 
+--   [] , x₁ ∷ xs , [] , x₁ ∷ zs , isInter[] , ∷left inTeq , refl , refl , refl 
+-- isInter-split-r (x ∷ ys₀) [] refl (∷left {x = x₁} {xs = xs} {zs = zs} inTeq) = 
+--   x₁ ∷ xs , [] , x₁ ∷ zs , [] , ∷left inTeq , isInter[] , refl , refl , refl
+-- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl (∷left {x = x₂} inTeq) with isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl inTeq
+-- ... | xs₀ , xs₁ , zs₀ , zs₁ , inTeq1 , inTeq2 , refl , refl , refl = x₂ ∷ xs₀ , xs₁ , x₂ ∷ zs₀ , zs₁ , ∷left inTeq1 , inTeq2 , refl , refl , refl
+-- isInter-split-r [] (x ∷ ys₁) refl (∷right {x = x₁} {xs = xs} {zs = zs} inTeq) = 
+--   [] , x₁ ∷ xs , [] , x ∷ zs , isInter[] , ∷right inTeq , refl , refl , refl
+-- isInter-split-r (x ∷ ys₀) [] refl (∷right {x = x₁} {xs = xs} {zs = zs} inTeq) = 
+--   x₁ ∷ xs , [] , x ∷ zs , [] , ∷right inTeq , isInter[] , refl , refl , refl
+-- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl (∷right inTeq) with isInter-split-r ys₀ (x₁ ∷ ys₁) refl inTeq
+-- ... | [] , x₂ ∷ xs₁ , .[] , zs₁ , isInter[] , inTeq2 , refl , refl , refl = [] , x₂ ∷ xs₁ , x ∷ [] , zs₁ , []left , inTeq2 , refl , refl , refl
+-- isInter-split-r (x ∷ .(_ ∷ xs)) (x₁ ∷ ys₁) refl (∷right .(isInter++ []left inTeq2)) | [] , x₂ ∷ xs₁ , .(_ ∷ xs) , zs₁ , []left {xs = xs} , inTeq2 , refl , refl , refl = [] , x₂ ∷ xs₁ , x ∷ _ ∷ xs , zs₁ , []left , inTeq2 , refl , refl , refl
+-- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl (∷right .(isInter++ inTeq1 inTeq2)) | x₂ ∷ xs₀ , xs₁ , zs₀ , zs₁ , inTeq1 , inTeq2 , refl , refl , refl = x₂ ∷ xs₀ , xs₁ , x ∷ zs₀ , zs₁ , ∷right inTeq1 , inTeq2 , refl , refl , refl
+
+
+
+
+
 
 -- Cut Elimination
 
@@ -226,3 +258,435 @@ data _≗_ : {S : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A 
 
 ≡-to-≗ : ∀{S}{Γ}{A}{f f' : S ∣ Γ ⊢ A} → f ≡ f' → f ≗ f'
 ≡-to-≗ refl = refl
+
+-- -- equational reasoning sugar for ≗
+
+infix 4 _≗'_
+infix 1 proof≗_
+infixr 2 _≗〈_〉_
+infix 3 _qed≗
+
+data _≗'_ {S  : Stp}{Γ : Cxt}{A : Fma} (f g : S ∣ Γ ⊢ A) : Set where
+  relto :  f ≗ g → f ≗' g
+
+proof≗_ : {S  : Stp}{Γ : Cxt}{A : Fma} {f g : S ∣ Γ ⊢ A} → f ≗' g → f ≗ g
+proof≗ relto p = p
+
+_≗〈_〉_ :  {S  : Stp}{Γ : Cxt}{A : Fma} (f : S ∣ Γ ⊢ A) {g h : S ∣ Γ ⊢ A} → f ≗ g → g ≗' h → f ≗' h 
+
+_ ≗〈 p 〉 relto q = relto (p ∙ q)
+
+_qed≗  :  {S  : Stp}{Γ : Cxt}{A : Fma} (f : S ∣ Γ ⊢ A) → f ≗' f
+_qed≗ _ = relto refl
+
+-- ====================================================================
+
+-- compatibility of inverse left rules with ≗
+
+congIl-1 : {Γ : Cxt} → {C : Fma} → 
+              {f g : just I ∣ Γ ⊢ C} →
+              f ≗ g → Il-1 f ≗ Il-1 g
+congIl-1 refl = refl
+congIl-1 (~ p) = ~ (congIl-1 p)
+congIl-1 (p ∙ p₁) = (congIl-1 p) ∙ (congIl-1 p₁)
+congIl-1 (Il p) = p
+congIl-1 (⊗r p p₁) = ⊗r (congIl-1 p) p₁
+congIl-1 axI = refl
+congIl-1 ⊗rIl = refl
+congIl-1 (⊸r p) = ⊸r (congIl-1 p)
+congIl-1 ⊸rIl = refl
+congIl-1 ex⊸r = ex⊸r
+congIl-1 (ex p) = ex (congIl-1 p)
+congIl-1 exex = exex
+congIl-1 exIl = refl
+congIl-1 ex⊗r₁ = ex⊗r₁
+congIl-1 ex⊗r₂ = ex⊗r₂
+congIl-1 ex-iso = ex-iso
+congIl-1 ex-braid = ex-braid
+
+cong⊗l-1 : {Γ : Cxt} → {A B C : Fma} → 
+            {f g : just (A ⊗ B) ∣ Γ ⊢ C} →
+            f ≗ g → ⊗l-1 f ≗ ⊗l-1 g
+cong⊗l-1 refl = refl
+cong⊗l-1 (~ p) = ~ (cong⊗l-1 p)
+cong⊗l-1 (p ∙ p₁) = (cong⊗l-1 p) ∙ (cong⊗l-1 p₁)
+cong⊗l-1 (⊗l p) = p
+cong⊗l-1 (⊗r p p₁) = ⊗r (cong⊗l-1 p) p₁
+cong⊗l-1 ax⊗ = refl
+cong⊗l-1 ⊗r⊗l = refl
+cong⊗l-1 (⊸r p) = ⊸r (cong⊗l-1 p)
+cong⊗l-1 ⊸r⊗l = refl
+cong⊗l-1 ex⊸r = ex⊸r          
+cong⊗l-1 (ex p) = ex (cong⊗l-1 p)
+cong⊗l-1 exex = exex
+cong⊗l-1 ex⊗l = refl
+cong⊗l-1 ex⊗r₁ = ex⊗r₁
+cong⊗l-1 ex⊗r₂ = ex⊗r₂
+cong⊗l-1 ex-iso = ex-iso
+cong⊗l-1 ex-braid = ex-braid
+
+-- ====================================================================
+
+-- Il-1 and ⊗l-1 are inverses up to ≗
+
+IlIl-1 : {Γ : Cxt} → {C : Fma} → 
+              (f : just I ∣ Γ ⊢ C) → Il (Il-1 f) ≗ f
+IlIl-1 ax = ~ axI
+IlIl-1 (⊗r f f₁) = (~ ⊗rIl) ∙ (⊗r (IlIl-1 f) refl)
+IlIl-1 (Il f) = refl 
+IlIl-1 (⊸r f) = (~ ⊸rIl) ∙ ⊸r (IlIl-1 f)        
+IlIl-1 (ex f) = (~ exIl) ∙ ex (IlIl-1 f)
+
+⊗l⊗l-1 : {Γ : Cxt} → {A B C : Fma} → 
+            (f : just (A ⊗ B) ∣ Γ ⊢ C) → ⊗l (⊗l-1 f) ≗ f
+⊗l⊗l-1 ax = ~ ax⊗
+⊗l⊗l-1 (⊗r f f₁) = (~ ⊗r⊗l) ∙ (⊗r (⊗l⊗l-1 f) refl)
+⊗l⊗l-1 (⊗l f) = refl      
+⊗l⊗l-1 (⊸r f) = (~ ⊸r⊗l) ∙ ⊸r (⊗l⊗l-1 f)     -- ~ ⊸r⊗l
+⊗l⊗l-1 (ex f) = (~ ex⊗l) ∙ ex (⊗l⊗l-1 f)
+
+-- ====================================================================
+
+-- Lots of admissible equations involving exchange
+
+cong-ex-fma-cxt : ∀{S Γ Δ} Λ {A C}{f g : S ∣ Γ ++ A ∷ Λ ++ Δ ⊢ C}
+    → f ≗ g → ex-fma-cxt {Γ = Γ}{Δ} Λ f ≗ ex-fma-cxt Λ g
+cong-ex-fma-cxt [] eq = eq
+cong-ex-fma-cxt {Γ = Γ} (x ∷ Λ) eq = cong-ex-fma-cxt Λ (ex eq)
+
+cong-ex-cxt-fma : ∀{S Γ Δ} Λ {A C}{f g : S ∣ Γ ++ Λ ++ A ∷ Δ ⊢ C}
+    → f ≗ g → ex-cxt-fma {Γ = Γ} Λ f ≗ ex-cxt-fma Λ g
+cong-ex-cxt-fma [] eq = eq
+cong-ex-cxt-fma {Γ = Γ} (x ∷ Λ) eq = ex (cong-ex-cxt-fma {Γ = Γ ++ x ∷ []} Λ eq)
+
+cong-ex-cxt-cxt2 : ∀{S Γ Δ} Λ₁ Λ₂ {C}{f g : S ∣ Γ ++ Λ₁ ++ Λ₂ ++ Δ ⊢ C}
+    → f ≗ g → ex-cxt-cxt2 {Γ = Γ}{Δ} Λ₁ Λ₂ f ≗ ex-cxt-cxt2 {Γ = Γ}{Δ} Λ₁ Λ₂ g
+cong-ex-cxt-cxt2 Λ₁ [] p = p
+cong-ex-cxt-cxt2 Λ₁ (x ∷ Λ₂) p =
+  cong-ex-cxt-cxt2 Λ₁ Λ₂ (cong-ex-cxt-fma Λ₁ p)
+
+ex-cxt-fma-ex : ∀{S Γ₁ Γ₂ Γ₃} Λ {A B A' C}{f : S ∣ Γ₁ ++ A ∷ B ∷ Γ₂ ++ Λ ++ A' ∷ Γ₃ ⊢ C}
+  → ex-cxt-fma {Γ = Γ₁ ++ B ∷ A ∷ Γ₂} Λ (ex {Γ = Γ₁} f)
+      ≗ ex {Γ = Γ₁} (ex-cxt-fma {Γ = Γ₁ ++ A ∷ B ∷ Γ₂} Λ f)
+ex-cxt-fma-ex [] = refl
+ex-cxt-fma-ex {Γ₁ = Γ₁} {Γ₂ = Γ₂}{Γ₃} (x ∷ Λ) = 
+  ex {Γ = Γ₁ ++ _ ∷ _ ∷ Γ₂} (ex-cxt-fma-ex {Γ₂ = Γ₂ ++ _ ∷ []} Λ)  ∙ exex
+
+ex-fma-cxt-ex : ∀{S Γ₁ Γ₂ Γ₃} Λ {A B A' C}{f : S ∣ Γ₁ ++ A ∷ B ∷ Γ₂ ++ A' ∷ Λ ++ Γ₃ ⊢ C}
+  → ex-fma-cxt {Γ = Γ₁ ++ B ∷ A ∷ Γ₂}{Γ₃} Λ (ex {Γ = Γ₁} f)
+      ≗ ex {Γ = Γ₁} (ex-fma-cxt {Γ = Γ₁ ++ A ∷ B ∷ Γ₂} Λ f)
+ex-fma-cxt-ex [] = refl
+ex-fma-cxt-ex {Γ₁ = Γ₁} {Γ₂} {Γ₃} (x ∷ Λ) =
+  cong-ex-fma-cxt Λ exex ∙ ex-fma-cxt-ex Λ
+
+ex-ex-cxt-fma : ∀{S Γ₁ Γ₂ Γ₃} Λ {A B A' C}{f : S ∣ Γ₁ ++ Λ ++ A' ∷ Γ₂ ++ A ∷ B ∷ Γ₃ ⊢ C}
+  → ex-cxt-fma {Γ = Γ₁} Λ (ex {Γ = Γ₁ ++ Λ ++ _ ∷ Γ₂} f)
+      ≗ ex {Γ = Γ₁ ++ _ ∷ Λ ++ Γ₂} (ex-cxt-fma {Γ = Γ₁} Λ f)
+ex-ex-cxt-fma [] = refl
+ex-ex-cxt-fma {Γ₁ = Γ₁} {Γ₂} (x ∷ Λ) =
+  ex (ex-ex-cxt-fma {Γ₁ = Γ₁ ++ _ ∷ []} Λ) ∙ (~ exex {Γ₁ = Γ₁}{Λ ++ Γ₂})
+
+ex-ex-fma-cxt : ∀{S Γ₁ Γ₂ Γ₃} Λ {A B A' C}{f : S ∣ Γ₁ ++ A' ∷ Λ ++ Γ₂ ++ A ∷ B ∷ Γ₃ ⊢ C}
+  → ex-fma-cxt {Γ = Γ₁} Λ (ex {Γ = Γ₁ ++ _ ∷ Λ ++ Γ₂} f)
+      ≗ ex {Γ = Γ₁ ++ Λ ++ _ ∷ Γ₂} (ex-fma-cxt {Γ = Γ₁} Λ f)
+ex-ex-fma-cxt [] = refl
+ex-ex-fma-cxt {Γ₁ = Γ₁} {Γ₂} (x ∷ Λ) = 
+  cong-ex-fma-cxt Λ (~ exex {Γ₁ = Γ₁}{Λ ++ Γ₂}) ∙ ex-ex-fma-cxt Λ 
+
+ex-fma-cxt-ex-fma-cxt : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁ ++ A ∷ Λ ++ Γ₂ ++ A' ∷ Λ' ++ Γ₃ ⊢ C}
+  → ex-fma-cxt {Γ = Γ₁ ++ Λ ++ A ∷ Γ₂}{Γ₃} Λ' (ex-fma-cxt {Γ = Γ₁} Λ f)
+      ≗ ex-fma-cxt {Γ = Γ₁} Λ (ex-fma-cxt {Γ = Γ₁ ++ A ∷ Λ ++ Γ₂} Λ' f)
+ex-fma-cxt-ex-fma-cxt [] Λ' = refl
+ex-fma-cxt-ex-fma-cxt {Γ₁ = Γ₁}  (x ∷ Λ) Λ' =
+  ex-fma-cxt-ex-fma-cxt {Γ₁ = Γ₁ ++ _ ∷ []} Λ Λ'
+  ∙ cong-ex-fma-cxt Λ (ex-fma-cxt-ex Λ')
+
+ex-cxt-fma-ex-cxt-fma : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁ ++ Λ ++ A ∷ Γ₂ ++ Λ' ++ A' ∷ Γ₃ ⊢ C}
+  → ex-cxt-fma {Γ = Γ₁ ++ A ∷ Λ ++ Γ₂} Λ' (ex-cxt-fma {Γ = Γ₁} Λ f)
+      ≗ ex-cxt-fma {Γ = Γ₁} Λ (ex-cxt-fma {Γ = Γ₁ ++ Λ ++ A ∷ Γ₂} Λ' f)
+ex-cxt-fma-ex-cxt-fma [] Λ' = refl
+ex-cxt-fma-ex-cxt-fma {Γ₁ = Γ₁} {Γ₂} (x ∷ Λ) Λ' =
+  ex-cxt-fma-ex {Γ₁ = Γ₁}{Λ ++ Γ₂} Λ'
+  ∙ ex (ex-cxt-fma-ex-cxt-fma {Γ₁ = Γ₁ ++ x ∷ []} Λ Λ')
+
+-- ex-cxt-fma-ex-cxt-fma : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁ ++ Λ ++ A ∷ Γ₂ ++ Λ' ++ A' ∷ Γ₃ ⊢ C}
+--   → ex-cxt-fma {Γ = Γ₁ ++ A ∷ Λ ++ Γ₂} Λ' (ex-cxt-fma {Γ = Γ₁} Λ f)
+--       ≗ ex-cxt-fma {Γ = Γ₁} Λ (ex-cxt-fma {Γ = Γ₁ ++ Λ ++ A ∷ Γ₂} Λ' f)
+
+
+ex-cxt-fma-braid : ∀{S Γ} Λ {Δ A B C}
+  → {f : S ∣ Γ ++ Λ ++ B ∷ A ∷ Δ ⊢ C}
+  → ex {Γ = Γ} (ex-cxt-fma {Γ = Γ ++ B ∷ []} Λ (ex-cxt-fma {Γ = Γ} Λ f))
+    ≗ ex-cxt-fma {Γ = Γ ++ A ∷ []} Λ (ex-cxt-fma {Γ = Γ} Λ (ex {Γ = Γ ++ Λ} f))
+ex-cxt-fma-braid [] = refl
+ex-cxt-fma-braid {Γ = Γ} (x ∷ Λ) {Δ} {A} {B} {f = f} =
+  proof≗
+    ex {Γ = Γ} (ex {Γ = Γ ++ B ∷ []} (ex-cxt-fma {Γ = Γ ++ B ∷ x ∷ []} Λ (ex {Γ = Γ} (ex-cxt-fma {Γ = Γ ++ x ∷ []} Λ f))))
+  ≗〈 ex (ex {Γ = Γ ++ B ∷ []} (ex-cxt-fma-ex Λ)) 〉
+    ex {Γ = Γ} (ex {Γ = Γ ++ B ∷ []} (ex {Γ = Γ} (ex-cxt-fma {Γ = Γ ++ x ∷ B ∷ []} Λ (ex-cxt-fma {Γ = Γ ++ x ∷ []} Λ f))))
+  ≗〈 ex-braid 〉
+    ex {Γ = Γ ++ A ∷ []} (ex {Γ = Γ} (ex {Γ = Γ ++ x ∷ []} (ex-cxt-fma {Γ = Γ ++ x ∷ B ∷ []} Λ (ex-cxt-fma {Γ = Γ ++ x ∷ []} Λ f))))
+  ≗〈 ex {Γ = Γ ++ A ∷ []} (ex (ex-cxt-fma-braid {Γ = Γ ++ x ∷ []} Λ)) 〉
+    ex {Γ = Γ ++ A ∷ []} (ex {Γ = Γ} (ex-cxt-fma {Γ = Γ ++ x ∷ A ∷ []} Λ (ex-cxt-fma {Γ = Γ ++ x ∷ []} Λ (ex {Γ = Γ ++ x ∷ Λ} f))))
+  ≗〈 ex {Γ = Γ ++ A ∷ []} (~ (ex-cxt-fma-ex Λ)) 〉
+    _
+  qed≗
+
+ex-fma-cxt-braid : ∀{S Γ} Λ {Δ A B C}
+  → {f : S ∣ Γ ++ B ∷ A ∷ Λ ++ Δ ⊢ C}
+  → ex-fma-cxt {Γ = Γ} Λ (ex-fma-cxt {Γ = Γ ++ _ ∷ []}{Δ} Λ (ex {Γ = Γ} f))
+    ≗ ex {Γ = Γ ++ Λ} (ex-fma-cxt {Γ = Γ} Λ (ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ f))
+ex-fma-cxt-braid [] = refl
+ex-fma-cxt-braid {Γ = Γ} (x ∷ Λ) {f = f} =
+  proof≗
+    ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ (ex (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex {Γ = Γ ++ _ ∷ []} (ex f))))
+  ≗〈 cong-ex-fma-cxt Λ (~ (ex-fma-cxt-ex Λ)) 〉
+    ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex {Γ = Γ} (ex {Γ = Γ ++ _ ∷ []} (ex {Γ = Γ} f))))
+  ≗〈 cong-ex-fma-cxt Λ (cong-ex-fma-cxt Λ ex-braid) 〉
+    ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex {Γ = Γ ++ _ ∷ []} (ex {Γ = Γ} (ex {Γ = Γ ++ _ ∷ []} f))))
+  ≗〈 ex-fma-cxt-braid {Γ = Γ ++ _ ∷ []} Λ 〉
+    ex {Γ = Γ ++ _ ∷ Λ} (ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex (ex {Γ = Γ ++ _ ∷ []} f))))
+  ≗〈 ex {Γ = Γ ++ _ ∷ Λ} (cong-ex-fma-cxt Λ (ex-fma-cxt-ex Λ)) 〉
+    ex {Γ = Γ ++ _ ∷ Λ} (ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ (ex (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex {Γ = Γ ++ _ ∷ []} f))))
+  qed≗
+
+ex-cxt-fma-ex-fma-cxt-braid : ∀{S Γ} Λ {Δ A B C}
+  → {f : S ∣ Γ ++ B ∷ Λ ++ A ∷ Δ ⊢ C}
+  → ex-fma-cxt {Γ = Γ ++ A ∷ []}{Δ} Λ (ex (ex-cxt-fma {Γ = Γ ++ B ∷ []} Λ f))
+    ≗ ex-cxt-fma {Γ = Γ} Λ (ex {Γ = Γ ++ Λ} (ex-fma-cxt {Γ = Γ}{A ∷ Δ} Λ f))
+ex-cxt-fma-ex-fma-cxt-braid [] = refl
+ex-cxt-fma-ex-fma-cxt-braid {Γ = Γ} (x ∷ Λ) {Δ} {A}{B} {f = f} =
+  proof≗
+    ex-fma-cxt {Γ = Γ ++ A ∷ _ ∷ []} Λ (ex {Γ = Γ ++ A ∷ []} (ex (ex {Γ = Γ ++ B ∷ []} (ex-cxt-fma {Γ = Γ ++ B ∷ x ∷ []} Λ f))))
+  ≗〈 cong-ex-fma-cxt Λ (~ ex-braid) 〉
+    ex-fma-cxt {Γ = Γ ++ A ∷ _ ∷ []} Λ (ex {Γ = Γ} (ex {Γ = Γ ++ _ ∷ []} (ex {Γ = Γ} (ex-cxt-fma {Γ = Γ ++ B ∷ x ∷ []} Λ f))))
+  ≗〈 ex-fma-cxt-ex Λ 〉
+    ex (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex {Γ = Γ ++ _ ∷ []} (ex {Γ = Γ} (ex-cxt-fma {Γ = Γ ++ B ∷ x ∷ []} Λ f))))
+  ≗〈 ex (cong-ex-fma-cxt Λ (ex {Γ = Γ ++ _ ∷ []} (~ ex-cxt-fma-ex Λ))) 〉
+    ex (ex-fma-cxt {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex {Γ = Γ ++ _ ∷ []} (ex-cxt-fma {Γ = Γ ++ _ ∷ _ ∷ []} Λ (ex f))))
+  ≗〈 ex (ex-cxt-fma-ex-fma-cxt-braid {Γ = Γ ++ _ ∷ []} Λ) 〉
+    ex (ex-cxt-fma {Γ = Γ ++ x ∷ []} Λ (ex {Γ = Γ ++ _ ∷ Λ} (ex-fma-cxt {Γ = Γ ++ _ ∷ []} Λ (ex f))))
+  qed≗
+
+ex-fma-cxt-ex-braid : ∀{S Γ₁} Δ₁ {Δ₂ Γ₂ A B A' C}
+  → {f : S ∣ Γ₁ ++ A' ∷ Δ₁ ++ A ∷ B ∷ Δ₂ ++ Γ₂ ⊢ C}
+  → ex-fma-cxt {Γ = Γ₁}{Γ₂} (Δ₁ ++ B ∷ A ∷ Δ₂) (ex {Γ = Γ₁ ++ A' ∷ Δ₁} f)
+    ≗ ex {Γ = Γ₁ ++ Δ₁} (ex-fma-cxt {Γ = Γ₁} (Δ₁ ++ A ∷ B ∷ Δ₂) f)
+ex-fma-cxt-ex-braid [] {Δ₂} =
+  cong-ex-fma-cxt Δ₂ (~ ex-braid)
+  ∙ ex-fma-cxt-ex Δ₂
+ex-fma-cxt-ex-braid {Γ₁ = Γ₁} (x ∷ Δ₁) {Δ₂} =
+  cong-ex-fma-cxt (Δ₁ ++ _ ∷ _ ∷ Δ₂) (~ exex)
+  ∙ ex-fma-cxt-ex-braid {Γ₁ = Γ₁ ++ x ∷ []} Δ₁ 
+
+ex-cxt-fma-ex-braid : ∀{S Γ₁} Δ₁ {Δ₂ Γ₂ A B A' C}
+  → {f : S ∣ Γ₁ ++ Δ₁ ++ A ∷ B ∷ Δ₂ ++ A' ∷ Γ₂ ⊢ C}
+  → ex-cxt-fma {Γ = Γ₁} (Δ₁ ++ B ∷ A ∷ Δ₂) (ex {Γ = Γ₁ ++ Δ₁} f)
+    ≗ ex {Γ = Γ₁ ++ A' ∷ Δ₁} (ex-cxt-fma {Γ = Γ₁} (Δ₁ ++ A ∷ B ∷ Δ₂) f)
+ex-cxt-fma-ex-braid {Γ₁ = Γ₁} [] {Δ₂} =
+  ex (ex {Γ = Γ₁ ++ _ ∷ []} (ex-cxt-fma-ex Δ₂))
+  ∙ ex-braid
+ex-cxt-fma-ex-braid {Γ₁ = Γ₁} (x ∷ Δ₁) =
+  ex (ex-cxt-fma-ex-braid {Γ₁ = Γ₁ ++ x ∷ []} Δ₁)
+  ∙ (~ exex)
+
+ex-cxt-fma++ : {S : Stp} → {Γ Δ : Cxt} (Λ Λ' : Cxt) → {A C : Fma} → 
+              (f : S ∣ Γ ++ Λ ++ Λ' ++ A ∷ Δ ⊢ C)  →
+              ex-cxt-fma {Γ = Γ} (Λ ++ Λ') f ≡ ex-cxt-fma {Γ = Γ} Λ (ex-cxt-fma {Γ = Γ ++ Λ} Λ' f)
+ex-cxt-fma++ [] Λ' f = refl
+ex-cxt-fma++ {Γ = Γ} (x ∷ Λ) Λ' f = cong ex (ex-cxt-fma++ {Γ = Γ ++ x ∷ []} Λ Λ' f)
+
+ex-fma-cxt++ : {S : Stp} → {Γ Δ : Cxt} (Λ Λ' : Cxt) → {A C : Fma} → 
+              (f : S ∣ Γ ++ A ∷ Λ ++ Λ' ++ Δ ⊢ C)  →
+              ex-fma-cxt {Γ = Γ}{Δ} (Λ ++ Λ') f ≡ ex-fma-cxt {Γ = Γ ++ Λ} Λ' (ex-fma-cxt {Γ = Γ} Λ f)
+ex-fma-cxt++ [] Λ' f = refl
+ex-fma-cxt++ {Γ = Γ} (x ∷ Λ) Λ' f = ex-fma-cxt++ {Γ = Γ ++ x ∷ []} Λ Λ' (ex f)
+
+ex-fma-cxt-pass : ∀ Γ Λ {Δ A B C}
+    → {f : just A ∣ Γ ++ B ∷ Λ ++ Δ ⊢ C}
+    → ex-fma-cxt {Γ = A ∷ Γ}{Δ} Λ (pass f) ≗ pass (ex-fma-cxt Λ f)
+ex-fma-cxt-pass Γ [] = refl
+ex-fma-cxt-pass Γ (x ∷ Λ) =
+  cong-ex-fma-cxt Λ expass ∙ ex-fma-cxt-pass (Γ ++ x ∷ []) Λ 
+
+ex-cxt-fma-pass : ∀ Γ Λ {Δ A B C}
+    → {f : just A ∣ Γ ++ Λ ++ B ∷ Δ ⊢ C}
+    → ex-cxt-fma {Γ = A ∷ Γ} Λ (pass f) ≗ pass (ex-cxt-fma Λ f)
+ex-cxt-fma-pass Γ [] = refl
+ex-cxt-fma-pass Γ (A' ∷ Λ) =
+  ex (ex-cxt-fma-pass (Γ ++ A' ∷ []) Λ) ∙ expass
+
+ex-fma-cxt-Il : ∀ Γ Λ {Δ A C}
+    → {f : nothing ∣ Γ ++ A ∷ Λ ++ Δ ⊢ C}
+    → ex-fma-cxt {Γ = Γ}{Δ} Λ (Il f) ≗ Il (ex-fma-cxt Λ f)
+ex-fma-cxt-Il Γ [] = refl
+ex-fma-cxt-Il Γ (x ∷ Λ) =
+  cong-ex-fma-cxt Λ exIl ∙ ex-fma-cxt-Il (Γ ++ _ ∷ []) Λ
+
+exIl-1 : {Γ Δ Λ : Cxt}{A B C : Fma} (f : just I ∣ Λ ⊢ C)
+  → (eq : Λ ≡ Γ ++ A ∷ B ∷ Δ)
+  → ex (Il-1 (subst (λ x → just I ∣ x ⊢ C) eq f))
+     ≡ Il-1 (ex (subst (λ x → just I ∣ x ⊢ C) eq f))
+exIl-1 {Γ} ax eq = ⊥-elim ([]disj∷ Γ eq)
+exIl-1 (ex f) eq = refl
+exIl-1 (⊗r f f₁) eq = refl
+exIl-1 (⊸r f) eq = refl
+exIl-1 (Il f) eq = refl
+
+ex-fma-cxt-Il-1 : ∀ Γ Λ {Δ A C}
+    → {f : just I ∣ Γ ++ A ∷ Λ ++ Δ ⊢ C}
+    → ex-fma-cxt {Γ = Γ}{Δ} Λ (Il-1 f) ≡ Il-1 (ex-fma-cxt Λ f)
+ex-fma-cxt-Il-1 Γ [] = refl
+ex-fma-cxt-Il-1 Γ (x ∷ Λ) {f = f} =
+  trans (cong (ex-fma-cxt Λ) (exIl-1 f refl))
+        (ex-fma-cxt-Il-1 (Γ ++ x ∷ []) Λ)
+
+ex-cxt-fma-Il : ∀ Γ Λ {Δ A C}
+    → {f : nothing ∣ Γ ++ Λ ++ A ∷ Δ ⊢ C}
+    → ex-cxt-fma {Γ = Γ} Λ (Il f) ≗ Il (ex-cxt-fma Λ f)
+ex-cxt-fma-Il Γ [] = refl
+ex-cxt-fma-Il Γ (A' ∷ Λ) =
+  ex (ex-cxt-fma-Il (Γ ++ A' ∷ []) Λ) ∙ exIl
+
+ex-cxt-fma-Il-1 : ∀ Γ Λ {Δ A C}
+    → {f : just I ∣ Γ ++ Λ ++ A ∷ Δ ⊢ C}
+    → ex-cxt-fma {Γ = Γ}{Δ} Λ (Il-1 f) ≡ Il-1 (ex-cxt-fma Λ f)
+ex-cxt-fma-Il-1 Γ [] = refl
+ex-cxt-fma-Il-1 Γ (x ∷ Λ) =
+  cong ex (ex-cxt-fma-Il-1 (Γ ++ x ∷ []) Λ)
+
+ex-fma-cxt-⊗l : ∀ Γ Λ {Δ A B A' C}
+    → {f : just A ∣ B ∷ Γ ++ A' ∷ Λ ++ Δ ⊢ C}
+    → ex-fma-cxt {Γ = Γ}{Δ} Λ (⊗l f) ≗ ⊗l (ex-fma-cxt Λ f)
+ex-fma-cxt-⊗l Γ [] = refl
+ex-fma-cxt-⊗l Γ (x ∷ Λ) =
+  cong-ex-fma-cxt Λ ex⊗l ∙ ex-fma-cxt-⊗l (Γ ++ _ ∷ []) Λ
+
+ex-cxt-fma-⊗l : ∀ Γ Λ {Δ A B A' C}
+    → {f : just A ∣ B ∷ Γ ++ Λ ++ A' ∷ Δ ⊢ C}
+    → ex-cxt-fma {Γ = Γ} Λ (⊗l f) ≗ ⊗l (ex-cxt-fma Λ f)
+ex-cxt-fma-⊗l Γ [] = refl
+ex-cxt-fma-⊗l Γ (A' ∷ Λ) =
+  ex (ex-cxt-fma-⊗l (Γ ++ A' ∷ []) Λ) ∙ ex⊗l
+
+ex-fma-cxt-⊗r₁ : ∀ {S} Γ Λ {Δ Δ' A B A'}
+    → {f : S ∣ Γ ++ A' ∷ Λ ++ Δ ⊢ A} {g : nothing ∣ Δ' ⊢ B}
+    → ex-fma-cxt {Γ = Γ}{Δ ++ Δ'} Λ (⊗r f g) ≗ ⊗r (ex-fma-cxt Λ f) g
+ex-fma-cxt-⊗r₁ Γ [] = refl
+ex-fma-cxt-⊗r₁ Γ (x ∷ Λ) =
+  cong-ex-fma-cxt Λ ex⊗r₁ ∙ ex-fma-cxt-⊗r₁ (Γ ++ _ ∷ []) Λ
+
+
+ex-cxt-fma-⊗r₁ : ∀ {S} Γ Λ {Δ Δ' A B A'}
+    → {f : S ∣ Γ ++ Λ ++ A' ∷ Δ ⊢ A} {g : nothing ∣ Δ' ⊢ B}
+    → ex-cxt-fma {Γ = Γ} Λ (⊗r f g) ≗ ⊗r (ex-cxt-fma Λ f) g
+ex-cxt-fma-⊗r₁ Γ [] = refl
+ex-cxt-fma-⊗r₁ Γ (A' ∷ Λ) =
+  ex (ex-cxt-fma-⊗r₁ (Γ ++ A' ∷ []) Λ) ∙ ex⊗r₁
+
+ex-fma-cxt-⊗r₂ : ∀ {S} Γ Λ {Δ Δ' A B A'}
+    → {f : S ∣ Δ' ⊢ A} {g : nothing ∣ Γ ++ A' ∷ Λ ++ Δ ⊢ B}
+    → ex-fma-cxt {Γ = Δ' ++ Γ}{Δ} Λ (⊗r f g) ≗ ⊗r f (ex-fma-cxt {Γ = Γ} Λ g)
+ex-fma-cxt-⊗r₂ Γ [] = refl
+ex-fma-cxt-⊗r₂ Γ (x ∷ Λ) =
+  cong-ex-fma-cxt Λ ex⊗r₂ ∙ ex-fma-cxt-⊗r₂ (Γ ++ _ ∷ []) Λ
+
+
+ex-cxt-fma-⊗r₂ : ∀ {S} Γ Λ {Δ Δ' A B A'}
+    → {f : S ∣ Δ' ⊢ A} {g : nothing ∣ Γ ++ Λ ++ A' ∷ Δ ⊢ B}
+    → ex-cxt-fma {Γ = Δ' ++ Γ} Λ (⊗r f g) ≗ ⊗r f (ex-cxt-fma {Γ = Γ} Λ g)
+ex-cxt-fma-⊗r₂ Γ [] = refl
+ex-cxt-fma-⊗r₂ Γ (A' ∷ Λ) {Δ' = Δ'} =
+  ex {Γ = Δ' ++ Γ} (ex-cxt-fma-⊗r₂ (Γ ++ A' ∷ []) Λ) ∙ ex⊗r₂
+
+ex-fma-cxt-⊸l₁ : ∀ Γ Λ {Δ Δ' A' A B C}
+    → {f : - ∣ Γ ++ A' ∷ Λ ++ Δ ⊢ A} {g : just B ∣ Δ' ⊢ C}
+    → ex-fma-cxt {Δ = Δ ++ Δ'} Λ (⊸l f g) ≗ ⊸l (ex-fma-cxt Λ f) g
+ex-fma-cxt-⊸l₁ Γ [] = refl
+ex-fma-cxt-⊸l₁ Γ (x ∷ Λ) {Δ} {Δ'} = cong-ex-fma-cxt {Δ = Δ ++ Δ'} Λ ex⊸l₁ ∙ ex-fma-cxt-⊸l₁ (Γ ++ x ∷ []) Λ
+
+ex-cxt-fma-⊸l₁ : ∀ Γ Λ {Δ Δ' A' A B C}
+    → {f : - ∣ Γ ++ Λ ++ A' ∷ Δ ⊢ A} {g : just B ∣ Δ' ⊢ C}
+    → ex-cxt-fma {Δ = Δ ++ Δ'} Λ (⊸l f g) ≗ ⊸l (ex-cxt-fma {Γ = Γ} Λ f) g
+ex-cxt-fma-⊸l₁ Γ [] = refl
+ex-cxt-fma-⊸l₁ Γ (x ∷ Λ) = ex (ex-cxt-fma-⊸l₁ (Γ ++ x ∷ []) Λ) ∙ ex⊸l₁
+
+ex-fma-cxt-⊸l₂ : ∀ Γ Λ {Δ Δ' A' A B C}
+    → {f : - ∣ Δ' ⊢ A} {g : just B ∣ Γ ++ A' ∷ Λ ++ Δ ⊢ C}
+    → ex-fma-cxt {Γ = Δ' ++ Γ} Λ (⊸l f g) ≗ ⊸l f (ex-fma-cxt {Γ = Γ} {Δ = Δ} Λ g)
+ex-fma-cxt-⊸l₂ Γ [] = refl
+ex-fma-cxt-⊸l₂ Γ (x ∷ Λ) {Δ' = Δ'} = cong-ex-fma-cxt Λ ex⊸l₂ ∙ ex-fma-cxt-⊸l₂ (Γ ++ x ∷ []) Λ
+
+ex-cxt-fma-⊸l₂ : ∀ Γ Λ {Δ Δ' A' A B C}
+    → {f : - ∣ Δ' ⊢ A} {g : just B ∣ Γ ++ Λ ++ A' ∷ Δ ⊢ C}
+    → ex-cxt-fma {Γ = Δ' ++ Γ} Λ (⊸l f g) ≗ ⊸l f (ex-cxt-fma {Γ = Γ} Λ g)
+ex-cxt-fma-⊸l₂ Γ [] = refl
+ex-cxt-fma-⊸l₂ Γ (x ∷ Λ) {Δ' = Δ'} = ex {Γ = Δ' ++ Γ} (ex-cxt-fma-⊸l₂ (Γ ++ x ∷ []) Λ) ∙ ex⊸l₂
+
+ex-fma-cxt-⊸r : ∀ {S} Γ Λ {Δ A' A B}
+    → {f : S ∣ Γ ++ A' ∷ Λ ++ Δ ++ A ∷ [] ⊢ B}
+    → ex-fma-cxt Λ (⊸r f) ≗ ⊸r (ex-fma-cxt {Δ = Δ ++ A ∷ []} Λ f)
+ex-fma-cxt-⊸r Γ [] = refl
+ex-fma-cxt-⊸r Γ (A'' ∷ Λ) {f = f} = cong-ex-fma-cxt {Γ = Γ ++ A'' ∷ []} Λ ex⊸r ∙ ex-fma-cxt-⊸r (Γ ++ A'' ∷ []) Λ
+
+ex-cxt-fma-⊸r : ∀ {S} Γ Λ {Δ A' A B}
+    → {f : S ∣ Γ ++ Λ ++ A' ∷ Δ ++ A ∷ [] ⊢ B}
+    → ex-cxt-fma {Γ = Γ} Λ (⊸r f) ≗ ⊸r (ex-cxt-fma {Δ = Δ ++ A ∷ []} Λ f)
+ex-cxt-fma-⊸r Γ [] = refl
+ex-cxt-fma-⊸r Γ (x ∷ Λ) = ex (ex-cxt-fma-⊸r (Γ ++ x ∷ []) Λ) ∙ ex⊸r
+
+ex-fma-cxt-iso1 : {S : Stp} → {Γ Δ : Cxt} (Λ : Cxt) → {A C : Fma}
+  → {f : S ∣ Γ ++ A ∷ Λ ++ Δ ⊢ C}
+  → ex-cxt-fma {Γ = Γ}{Δ} Λ (ex-fma-cxt {Γ = Γ} Λ f) ≗ f
+ex-fma-cxt-iso1 [] = refl
+ex-fma-cxt-iso1 {Γ = Γ} (x ∷ Λ) =
+  ex (ex-fma-cxt-iso1 {Γ = Γ ++ _ ∷ []} Λ) ∙ ex-iso
+
+ex-fma-cxt-iso2 : {S : Stp} → {Γ Δ : Cxt} (Λ : Cxt) → {A C : Fma}
+  → {f : S ∣ Γ ++ Λ ++ A ∷ Δ ⊢ C}
+  → ex-fma-cxt {Γ = Γ}{Δ} Λ (ex-cxt-fma {Γ = Γ} Λ f) ≗ f
+ex-fma-cxt-iso2 [] = refl
+ex-fma-cxt-iso2 {Γ = Γ} (x ∷ Λ) =
+  cong-ex-fma-cxt Λ ex-iso ∙ ex-fma-cxt-iso2 {Γ = Γ ++ _ ∷ []} Λ
+
+ex-ex-cxt-cxt2 : {S : Stp} → {Γ₁ Γ₂ Γ₃ : Cxt} (Λ₁ Λ₂ : Cxt) → {A B C : Fma}
+  → (f : S ∣ Γ₁ ++ A ∷ B ∷ Γ₂ ++ Λ₁ ++ Λ₂ ++ Γ₃ ⊢ C)
+  → ex-cxt-cxt2 {Γ = Γ₁ ++ B ∷ A ∷ Γ₂} {Γ₃} Λ₁ Λ₂ (ex f)
+    ≗ ex (ex-cxt-cxt2 {Γ = Γ₁ ++ A ∷ B ∷ Γ₂} {Γ₃} Λ₁ Λ₂ f)
+ex-ex-cxt-cxt2 Λ₁ [] f = refl
+ex-ex-cxt-cxt2 {Γ₁ = Γ₁} {Γ₂} {Γ₃} Λ₁ (x ∷ Λ₂) f =
+  cong-ex-cxt-cxt2 Λ₁ Λ₂ (ex-cxt-fma-ex {Γ₁ = Γ₁}{Γ₂} Λ₁)
+  ∙ ex-ex-cxt-cxt2 {Γ₁ = Γ₁} {Γ₂ ++ x ∷ []} {Γ₃} Λ₁ Λ₂ _
+
+ex-cxt-cxt2∷ : {S : Stp} → {Γ Δ : Cxt} (Λ₁ Λ₂ : Cxt) → {A C : Fma}
+  → (f : S ∣ Γ ++ A ∷ Λ₁ ++ Λ₂ ++ Δ ⊢ C)
+  → ex-cxt-cxt2 {Γ = Γ}{Δ} (A ∷ Λ₁) Λ₂ f
+    ≗ ex-fma-cxt {Γ = Γ} Λ₂ (ex-cxt-cxt2 {Γ = Γ ++ A ∷ []}{Δ} Λ₁ Λ₂ f)
+ex-cxt-cxt2∷ Λ₁ [] f = refl
+ex-cxt-cxt2∷ {Γ = Γ} {Δ} Λ₁ (x ∷ Λ₂) f = 
+  ex-cxt-cxt2∷ {Γ = Γ ++ x ∷ []} {Δ} Λ₁ Λ₂ _
+  ∙ cong-ex-fma-cxt Λ₂ (ex-ex-cxt-cxt2 Λ₁ Λ₂ _)
+
+ex-cxt-cxt≗ : {S : Stp} → {Γ Δ : Cxt} (Λ₁ Λ₂ : Cxt) → {C : Fma}
+  → (f : S ∣ Γ ++ Λ₁ ++ Λ₂ ++ Δ ⊢ C)
+  → ex-cxt-cxt1 {Γ = Γ}{Δ} Λ₁ Λ₂ f ≗ ex-cxt-cxt2 {Γ = Γ}{Δ} Λ₁ Λ₂ f
+ex-cxt-cxt≗ [] Λ₂ f = ~ (≡-to-≗ (ex-cxt-cxt2[] Λ₂ f))
+ex-cxt-cxt≗ {Γ = Γ} {Δ} (x ∷ Λ₁) Λ₂ f =
+  cong-ex-fma-cxt Λ₂ (ex-cxt-cxt≗ {Γ = Γ ++ x ∷ []} Λ₁ Λ₂ f)
+  ∙ (~ (ex-cxt-cxt2∷ Λ₁ Λ₂ f)) 
+
+ex-fma-cxt-ex-cxt-fma : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁ ++ Λ ++ A ∷ Γ₂ ++ A' ∷ Λ' ++ Γ₃ ⊢ C}
+  → ex-fma-cxt {Γ = Γ₁ ++ A ∷ Λ ++ Γ₂} {Δ = Γ₃} Λ' (ex-cxt-fma {Γ = Γ₁} Λ f)
+      ≗ ex-cxt-fma {Γ = Γ₁} Λ (ex-fma-cxt {Γ = Γ₁ ++ Λ ++ A ∷ Γ₂} Λ' f)
+ex-fma-cxt-ex-cxt-fma [] Λ' = refl
+ex-fma-cxt-ex-cxt-fma {Γ₁ = Γ₁} {Γ₂} (x ∷ Λ) Λ' = ex-fma-cxt-ex Λ' ∙ ex (ex-fma-cxt-ex-cxt-fma {Γ₁ = Γ₁ ++ x ∷ []} Λ Λ')
+
+-- ex-fma-cxt-ex-cxt-fma' : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁ ++ Λ ++ A ∷ Γ₂ ++ A' ∷ Λ' ++ Γ₃ ⊢ C}
+--   → ex-fma-cxt {Γ = Γ₁ ++ A' ∷ Λ} {Δ = Γ₃} (Γ₂ ++ Λ') (ex-cxt-fma {Γ = Γ₁} {Δ = Λ' ++ Γ₃} (Λ ++ A ∷ Γ₂) f) 
+--     ≗ ex-cxt-fma {Γ = Γ₁} {Δ = Λ' ++ A ∷ Γ₃} (Λ ++ Γ₂) (ex-fma-cxt {Γ = Γ₁ ++ Λ} {Δ = Γ₃} (Γ₂ ++ A' ∷ Λ') f)
+-- ex-fma-cxt-ex-cxt-fma' {Γ₁ = Γ₁} {Γ₂ = Γ₂} {Γ₃} [] Λ' {A} {A'} {f = f} = 
+--   ≡-to-≗ (ex-fma-cxt++ {Γ = Γ₁ ++ A' ∷ []} Γ₂ Λ' (ex (ex-cxt-fma {Γ = Γ₁ ++ A ∷ []} Γ₂ f))) 
+--   ∙ ((cong-ex-fma-cxt Λ' (ex-cxt-fma-ex-fma-cxt-braid Γ₂) ∙ ex-fma-cxt-ex-cxt-fma Γ₂ Λ') 
+--   ∙ cong-ex-cxt-fma Γ₂ (~ (≡-to-≗ (ex-fma-cxt++ Γ₂ (A' ∷ Λ') f))))
+-- ex-fma-cxt-ex-cxt-fma' (x ∷ Λ) Λ' = {!   !}
+
