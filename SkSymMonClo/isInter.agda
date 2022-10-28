@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting #-}
 
-module isInter where
+module IsInter where
 
 open import Data.List renaming (map to mapList; fromMaybe to backlist)
 open import Data.List.Relation.Unary.Any
@@ -92,13 +92,6 @@ isInter-split {ys₀ = []} refl (∷right {x} {xs = xs} {zs = zs} eq') = ([] , (
 isInter-split {ys₀ = x ∷ ys₀} refl (∷right eq') with isInter-split refl eq'
 ... | xs₀ , xs₁ , zs₀ , zs₁ , eq₀ , refl , inTeq , inTeq' = (xs₀ , xs₁ , (_ ∷ zs₀) , zs₁ , eq₀ , refl , isInter++r (_ ∷ []) inTeq , inTeq')
 
-isInter-consL : {X : Set} → {xs zs ys : List X} → {y : X} → isInter xs (y ∷ ys) zs → 
-             Σ (List X) (λ xs₀ → Σ (List X) (λ xs₁ → Σ (List X) (λ zs₁ → 
-             xs ≡ xs₀ ++ xs₁ × zs ≡ xs₀ ++ y ∷ zs₁ × isInter xs₁ ys zs₁
-             )))
-isInter-consL eq with isInter-split {ys₀ = []} refl eq
-... | xs₀ , xs₁ , zs₀ , zs₁ , refl , refl , inTeq , inTeq' with isInter-left[] inTeq
-... | refl = xs₀ , xs₁ , zs₁ , refl , refl , inTeq'
 
 isInter-split-left : {X : Set} → {xs xs₀ xs₁ zs ys : List X} → {x : X} → (xs ≡ xs₀ ++ x ∷ xs₁) → isInter xs ys zs → 
              Σ (List X) (λ ys₀ → Σ (List X) (λ ys₁ → Σ (List X) (λ zs₀ → Σ (List X) (λ zs₁ → 
@@ -174,7 +167,7 @@ isInter++-++l-refl isInter[] inTeq2 = refl
 isInter++-++l-refl []right inTeq2 = refl
 
 isInter++-∷left' : {X : Set} → {x : X} → (ys : List X) → {xs zs xs1 ys1 zs1 : List X} → (inTeq : isInter xs ys zs) → (inTeq2 : isInter xs1 ys1 zs1)
-  → isInter++ (∷left' {x = x} ys inTeq) inTeq2 ≡ ∷left' (ys ++ ys1) (isInter++ inTeq inTeq2)
+  → ∷left' (ys ++ ys1) (isInter++ inTeq inTeq2) ≡ isInter++ (∷left' {x = x} ys inTeq) inTeq2
 isInter++-∷left' [] inTeq inTeq2 with isInter-left[] inTeq
 isInter++-∷left' [] inTeq isInter[] | refl with isInter-left[] (isInter++ inTeq isInter[])
 ... | refl = refl
@@ -416,3 +409,70 @@ isInter-split-r (x ∷ ys₀) ys₁ refl (∷right {x = x₁} inTeq) | [] , x₁
 ... | refl =  [] , x₁ ∷ xs , x ∷ zs₀ , zs₁ , []left , inTeq2 , refl , refl , refl
 isInter-split-r (x ∷ ys₀) ys₁ refl (∷right {x = x₁} inTeq) | x₁ ∷ xs₀ , xs₁ , zs₀ , zs₁ , inTeq1 , inTeq2 , refl , refl , refl = 
   x₁ ∷ xs₀ , xs₁ , x ∷ zs₀ , zs₁ , ∷right inTeq1 , inTeq2 , refl , refl , refl
+
+isInter-split-r-++-refl : {X : Set} → {xs₀ xs₁ ys₀ ys₁ zs₀ zs₁ : List X} → {x : X} → (inTeq1 : isInter xs₀ ys₀ zs₀) (inTeq2 : isInter xs₁ ys₁ zs₁) → 
+             isInter-split-r ys₀ ys₁ refl (isInter++ inTeq1 (∷right' {x = x} xs₁ inTeq2)) ≡ (xs₀ , xs₁ , zs₀ , zs₁ , inTeq1 , inTeq2 , refl , refl , refl)
+isInter-split-r-++-refl isInter[] isInter[] = refl
+isInter-split-r-++-refl isInter[] []left = refl
+isInter-split-r-++-refl isInter[] []right = refl
+isInter-split-r-++-refl {x = x} isInter[] (∷left {ys = ys} inTeq2) with isInter-split-r [] ys refl inTeq2
+... | .[] , .[] , .[] , .[] , isInter[] , isInter[] , refl , refl , refl = refl
+... | .[] , .[] , .[] , .(_ ∷ _) , isInter[] , []left , refl , refl , refl = refl
+... | .[] , .(_ ∷ _) , .[] , .(_ ∷ _) , isInter[] , []right , refl , refl , refl = refl
+... | .[] , .(_ ∷ _) , .[] , .(_ ∷ _) , isInter[] , ∷left inTeq4 , refl , refl , refl = refl
+... | .[] , .(_ ∷ _) , .[] , .(_ ∷ _) , isInter[] , ∷right inTeq4 , refl , refl , refl = refl
+... | .(_ ∷ _) , .[] , .(_ ∷ _) , .[] , []right , isInter[] , refl , refl , refl = refl
+... | .(_ ∷ _) , .[] , .(_ ∷ _) , .(_ ∷ _) , []right , []left , refl , refl , refl = refl
+... | .(_ ∷ _) , .(_ ∷ _) , .(_ ∷ _) , .(_ ∷ _) , []right , []right , refl , refl , refl = refl
+... | .(_ ∷ _) , .(_ ∷ _) , .(_ ∷ _) , .(_ ∷ _) , []right , ∷left inTeq4 , refl , refl , refl = refl
+... | .(_ ∷ _) , .(_ ∷ _) , .(_ ∷ _) , .(_ ∷ _) , []right , ∷right inTeq4 , refl , refl , refl = refl
+isInter-split-r-++-refl {x = x} isInter[] (∷right {y = y} {ys = ys} inTeq2) with isInter-split-r {y = x} [] ys refl (∷right inTeq2)
+... | .[] , .(_ ∷ _) , .[] , zs₁' , isInter[] , .inTeq2 , refl , refl , refl rewrite isInter-split-r-++-refl {x = y} isInter[] inTeq2 = refl
+... | .(x ∷ _) , xs₁' , .(x ∷ _) , zs₁' , []right , inTeq4 , refl , refl , ()
+isInter-split-r-++-refl {x = y} ([]left {x} {xs}) isInter[] = refl
+isInter-split-r-++-refl {x = y} ([]left {x} {xs}) []left = refl
+isInter-split-r-++-refl {x = y} ([]left {x = x₁} {xs = []}) ([]right {x = x} {xs}) = refl
+isInter-split-r-++-refl {x = y} ([]left {x = x₁} {xs = x₂ ∷ xs₁}) ([]right {x = x} {xs}) 
+    rewrite isInter-split-r-++-refl {x = y} ([]left {x = x₂} {xs = xs₁}) ([]right {x = x} {xs}) = refl
+isInter-split-r-++-refl {x = y} ([]left {x} {[]}) (∷left {x = x₁} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} isInter[] (∷left {x = x₁} inTeq2) = refl
+isInter-split-r-++-refl {x = y} ([]left {x} {x₁ ∷ xs}) (∷left {x = x₂} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} ([]left {x = x₁} {xs}) (∷left {x = x₂} inTeq2) = refl
+isInter-split-r-++-refl {x = y} ([]left {x} {[]}) (∷right {y = y₁} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} isInter[] (∷right {y = y₁} inTeq2) = refl
+isInter-split-r-++-refl {x = y} ([]left {x} {x₁ ∷ xs}) (∷right {y = y₁} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} ([]left {x = x₁} {xs}) (∷right {y = y₁} inTeq2) = refl
+isInter-split-r-++-refl {xs₁ = .[]} {ys₁ = .[]} {x = y} ([]right {x} {[]}) isInter[] = refl
+isInter-split-r-++-refl {xs₁ = .[]} {ys₁ = .(_ ∷ _)} {x = y} ([]right {x} {[]}) []left = refl
+isInter-split-r-++-refl {xs₁ = .(_ ∷ _)} {ys₁ = .[]} {x = y} ([]right {x} {[]}) []right = refl
+isInter-split-r-++-refl {xs₁ = .(_ ∷ _)} {ys₁ = .(_ ∷ _)} {x = y} ([]right {x} {[]}) (∷left {x = x₁} inTeq2)
+    rewrite isInter-split-r-++-refl {x = y} isInter[] (∷left {x = x₁} inTeq2) = refl
+isInter-split-r-++-refl {xs₁ = .(_ ∷ _)} {ys₁ = .(_ ∷ _)} {x = y} ([]right {x} {[]}) (∷right {y = x₁} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} isInter[] (∷right {y = x₁} inTeq2) = refl
+isInter-split-r-++-refl {xs₁ = .[]} {ys₁ = .[]} {x = y} ([]right {x} {x₁ ∷ xs}) isInter[] 
+    rewrite isInter-split-r-++-refl {x = y} ([]right {x = x₁} {xs}) isInter[] = refl
+isInter-split-r-++-refl {xs₁ = .[]} {ys₁ = .(_ ∷ _)} {x = y} ([]right {x} {x₁ ∷ xs}) ([]left {x = x₂} {xs₂}) 
+    rewrite isInter-split-r-++-refl {x = y} ([]right {x = x₁} {xs}) ([]left {x = x₂} {xs₂}) = refl
+isInter-split-r-++-refl {xs₁ = .(_ ∷ _)} {ys₁ = .[]} {x = y} ([]right {x} {x₁ ∷ xs}) ([]right {x = x₂} {xs₂}) 
+    rewrite isInter-split-r-++-refl {x = y} ([]right {x = x₁} {xs}) ([]right {x = x₂} {xs₂}) = refl
+isInter-split-r-++-refl {xs₁ = .(_ ∷ _)} {ys₁ = .(_ ∷ _)} {x = y} ([]right {x} {x₁ ∷ xs}) (∷left {x = x₂} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} ([]right {x = x₁} {xs}) (∷left {x = x₂} inTeq2) = refl
+isInter-split-r-++-refl {xs₁ = .(_ ∷ _)} {ys₁ = .(_ ∷ _)} {x = y} ([]right {x} {x₁ ∷ xs}) (∷right {y = x₂} inTeq2) 
+    rewrite isInter-split-r-++-refl {x = y} ([]right {x = x₁} {xs}) (∷right {y = x₂} inTeq2) = refl
+isInter-split-r-++-refl {x = x} (∷left inTeq1) inTeq2 
+    rewrite isInter-split-r-++-refl {x = x} inTeq1 inTeq2 = refl
+isInter-split-r-++-refl {x = x} (∷right inTeq1) inTeq2 
+    rewrite isInter-split-r-++-refl {x = x} inTeq1 inTeq2 = refl
+
+isInter++l-∷left' : {X : Set} {x : X} {xs ys zs : List X} (xs' : List X) (inTeq : isInter xs ys zs)
+  → isInter++l (x ∷ xs') inTeq ≡ ∷left' ys (isInter++l xs' inTeq)
+isInter++l-∷left' [] isInter[] = refl
+isInter++l-∷left' [] []left = refl
+isInter++l-∷left' [] []right = refl
+isInter++l-∷left' [] (∷left inTeq) = refl
+isInter++l-∷left' [] (∷right inTeq) = refl
+isInter++l-∷left' (x ∷ xs') isInter[] = refl
+isInter++l-∷left' (x ∷ xs') []left = refl
+isInter++l-∷left' (x ∷ xs') []right = refl
+isInter++l-∷left' (x ∷ xs') (∷left inTeq) = refl
+isInter++l-∷left' (x ∷ xs') (∷right inTeq) = refl -- ⊸r⋆seq⊗l

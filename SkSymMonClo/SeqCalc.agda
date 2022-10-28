@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality hiding (_≗_)
 open ≡-Reasoning
 open import Formulae
 open import Utilities
-open import isInter
+open import IsInter
 -- 
 
 -- Sequent Calculus
