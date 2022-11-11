@@ -476,3 +476,6 @@ isInter++l-∷left' (x ∷ xs') []left = refl
 isInter++l-∷left' (x ∷ xs') []right = refl
 isInter++l-∷left' (x ∷ xs') (∷left inTeq) = refl
 isInter++l-∷left' (x ∷ xs') (∷right inTeq) = refl -- ⊸r⋆seq⊗l
+
+-- isInter++l-∷right' : {X : Set} {x : X} {xs ys zs : List X} (xs' : List X) (inTeq : isInter xs ys zs)
+--   → isInter++l xs' (∷right' xs inTeq) ≡ ∷right' (xs' ++ xs) (isInter++l xs' inTeq)
