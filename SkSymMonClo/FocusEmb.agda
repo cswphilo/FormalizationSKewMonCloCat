@@ -61,34 +61,34 @@ focus-ex-fma-cxt [] f = refl
 focus-ex-fma-cxt {Γ = Γ} {Δ} (A ∷ Λ) f = focus-ex-fma-cxt {Γ = Γ ++ A ∷ []} Λ (ex f) 
 
 -- act⋆-ex-cxt-fma-c : 
-mutual
-    c∙2c : {S : Stp} {Γ Δ : TCxt} {C : Fma} 
-        → (f : ∙ ∣ S ∣ Γ ؛ Δ ⊢c C)
-        → S ∣ ersL Γ ؛ ersL Δ ⊢c C
-    c∙2c (ex∙ f refl refl) = ex (c∙2c f) refl refl
-    c∙2c (ri2c f) = ri2c (ri∙2ri f)  
-    ri∙2ri : {S : Stp} {Γ : TCxt} {C : Fma}
-        → (f : ∙ ∣ S ∣ Γ ⊢ri C)
-        → S ∣ ersL Γ ⊢ri C
-    ri∙2ri (⊸r∙ (ex∙ (ex∙ {Γ = x ∷ Γ} f refl refl) eq' eq)) = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
-    ri∙2ri (⊸r∙ (ex∙ (ri2c f) refl refl)) = ⊸r (ex (ri2c (ri∙2ri f)) refl refl)
-    ri∙2ri (li2ri f) = li2ri (li∙2li f)
-    li∙2li : {S : Stp} {Γ : TCxt} {C : Pos}
-        → (f : ∙ ∣ S ∣ Γ ⊢li C)
-        → S ∣ ersL Γ ⊢li C
-    li∙2li (p2li f) = p2li (p∙2p f)
-    p∙2p : {S : Irr} {Γ : TCxt} {C : Pos}
-        → (f : ∙ ∣ S ∣ Γ ⊢p C)
-        → S ∣ ersL Γ ⊢p C
-    p∙2p (pass∙ f) = pass f
-    p∙2p (f2p f) = f2p (f∙2f f)
-    f∙2f : {S : Irr} {Γ : TCxt} {C : Pos}
-        → (f : ∙ ∣ S ∣ Γ ⊢f C)
-        → S ∣ ersL Γ ⊢f C
-    f∙2f ax = ax
-    f∙2f Ir = Ir
-    f∙2f (⊗r f g) = ⊗r f g
-    f∙2f (⊸l∙ f g refl) = ⊸l f g
+-- mutual
+--     c∙2c : {S : Stp} {Γ Δ : TCxt} {C : Fma} 
+--         → (f : ∙ ∣ S ∣ Γ ؛ Δ ⊢c C)
+--         → S ∣ ersL Γ ؛ ersL Δ ⊢c C
+--     c∙2c (ex∙ f refl refl) = ex (c∙2c f) refl refl
+--     c∙2c (ri2c f) = ri2c (ri∙2ri f)  
+--     ri∙2ri : {S : Stp} {Γ : TCxt} {C : Fma}
+--         → (f : ∙ ∣ S ∣ Γ ⊢ri C)
+--         → S ∣ ersL Γ ⊢ri C
+--     ri∙2ri (⊸r∙ (ex∙ (ex∙ {Γ = x ∷ Γ} f refl refl) eq' eq)) = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
+--     ri∙2ri (⊸r∙ (ex∙ (ri2c f) refl refl)) = ⊸r (ex (ri2c (ri∙2ri f)) refl refl)
+--     ri∙2ri (li2ri f) = li2ri (li∙2li f)
+--     li∙2li : {S : Stp} {Γ : TCxt} {C : Pos}
+--         → (f : ∙ ∣ S ∣ Γ ⊢li C)
+--         → S ∣ ersL Γ ⊢li C
+--     li∙2li (p2li f) = p2li (p∙2p f)
+--     p∙2p : {S : Irr} {Γ : TCxt} {C : Pos}
+--         → (f : ∙ ∣ S ∣ Γ ⊢p C)
+--         → S ∣ ersL Γ ⊢p C
+--     p∙2p (pass∙ f) = pass f
+--     p∙2p (f2p f) = f2p (f∙2f f)
+--     f∙2f : {S : Irr} {Γ : TCxt} {C : Pos}
+--         → (f : ∙ ∣ S ∣ Γ ⊢f C)
+--         → S ∣ ersL Γ ⊢f C
+--     f∙2f ax = ax
+--     f∙2f Ir = Ir
+--     f∙2f (⊗r f g) = ⊗r f g
+--     f∙2f (⊸l∙ f g refl) = ⊸l f g
 
 act⋆-Il-c : (Φ Γ : Cxt) {Δ : Cxt} {C : Fma} {f : - ∣ Φ ؛ Γ ++ Δ ⊢c C}
     → Il-c (act⋆ Φ Γ {Δ} f) ≡ act⋆ Φ Γ (Il-c f)
