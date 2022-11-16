@@ -260,56 +260,169 @@ ex-cxt-fma-⊸r⋆seq {Λ₀ = Λ₀} {Ψ₀ = Ψ₀} {.(Ω₀ ++ D ∷ xs₁)} 
   
 ersL-isInter : {Γ Γ₀ Γ₁' : TCxt} (inTeq : isInter Γ₀ Γ₁' Γ) → isInter (ersL Γ₀) (ersL Γ₁') (ersL Γ)
 ersL-isInter isInter[] = isInter[]
-ersL-isInter []left = []left
-ersL-isInter []right = []right
-ersL-isInter (∷left inTeq) = ∷left (ersL-isInter inTeq)
-ersL-isInter (∷right inTeq) = ∷right (ersL-isInter inTeq)
+ersL-isInter ([]left {∘ , A}) = []left
+ersL-isInter ([]left {∙ , A}) = []left
+ersL-isInter ([]right {∘ , A}) = []right
+ersL-isInter ([]right {∙ , A}) = []right
+ersL-isInter (∷left {∘ , A} {∘ , B} inTeq) = ∷left (ersL-isInter inTeq)
+ersL-isInter (∷left {∘ , A} {∙ , B} inTeq) = ∷left (ersL-isInter inTeq)
+ersL-isInter (∷left {∙ , A} {∘ , B} inTeq) = ∷left (ersL-isInter inTeq)
+ersL-isInter (∷left {∙ , A} {∙ , B} inTeq) = ∷left (ersL-isInter inTeq) -- ∷left (ersL-isInter inTeq)
+ersL-isInter (∷right {∘ , A} {∘ , B} inTeq) = ∷right (ersL-isInter inTeq)
+ersL-isInter (∷right {∘ , A} {∙ , B} inTeq) = ∷right (ersL-isInter inTeq)
+ersL-isInter (∷right {∙ , A} {∘ , B} inTeq) = ∷right (ersL-isInter inTeq)
+ersL-isInter (∷right {∙ , A} {∙ , B} inTeq) = ∷right (ersL-isInter inTeq) -- ∷right (ersL-isInter inTeq)
 
 ersL-isInter++l : {Γ₀ Γ₁ Γ : TCxt} → (Γ' : TCxt) (inTeq : isInter Γ₀ Γ₁ Γ) → ersL-isInter (isInter++l Γ' inTeq) ≡ isInter++l (ersL Γ') (ersL-isInter inTeq)
 ersL-isInter++l [] inTeq = refl
-ersL-isInter++l (A ∷ Γ') isInter[] = refl
-ersL-isInter++l (A ∷ Γ') []left = cong ∷left (ersL-isInter++l  Γ' []left)
-ersL-isInter++l (A ∷ Γ') []right = refl
-ersL-isInter++l (A ∷ Γ') (∷left inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
-ersL-isInter++l (A ∷ Γ') (∷right inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq)) 
+ersL-isInter++l ((∘ , A) ∷ Γ') isInter[] = refl
+ersL-isInter++l ((∘ , A) ∷ Γ') ([]left {∘ , B}) = cong ∷left (ersL-isInter++l Γ' []left)
+ersL-isInter++l ((∘ , A) ∷ Γ') ([]left {∙ , B}) = cong ∷left (ersL-isInter++l Γ' []left)
+ersL-isInter++l ((∘ , A) ∷ Γ') ([]right {∘ , B} {xs}) = refl
+ersL-isInter++l ((∘ , A) ∷ Γ') ([]right {∙ , B} {xs}) = refl
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷left {∘ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷left {∘ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷left {∙ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷left {∙ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷right {∘ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷right {∘ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷right {∙ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∘ , A) ∷ Γ') (∷right {∙ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') isInter[] = refl
+ersL-isInter++l ((∙ , A) ∷ Γ') ([]left {∘ , B}) = cong ∷left (ersL-isInter++l Γ' []left)
+ersL-isInter++l ((∙ , A) ∷ Γ') ([]left {∙ , B}) = cong ∷left (ersL-isInter++l Γ' []left)
+ersL-isInter++l ((∙ , A) ∷ Γ') ([]right {∘ , B} {xs}) = refl
+ersL-isInter++l ((∙ , A) ∷ Γ') ([]right {∙ , B} {xs}) = refl
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷left {∘ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷left {∘ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷left {∙ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷left {∙ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷left inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷right {∘ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷right {∘ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷right {∙ , B} {∘ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
+ersL-isInter++l ((∙ , A) ∷ Γ') (∷right {∙ , B} {∙ , C} inTeq) = cong ∷left (ersL-isInter++l Γ' (∷right inTeq))
 
 ersL-isInter++r : {Γ₀ Γ₁ Γ : TCxt} → (Γ' : TCxt) (inTeq : isInter Γ₀ Γ₁ Γ) → ersL-isInter (isInter++r Γ' inTeq) ≡ isInter++r (ersL Γ') (ersL-isInter inTeq)
 ersL-isInter++r [] inTeq = refl
-ersL-isInter++r (A ∷ Γ') isInter[] = refl
-ersL-isInter++r (A ∷ Γ') []left = refl
-ersL-isInter++r (A ∷ Γ') []right = cong ∷right (ersL-isInter++r Γ' []right)
-ersL-isInter++r (A ∷ Γ') (∷left inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
-ersL-isInter++r (A ∷ Γ') (∷right inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') isInter[] = refl
+ersL-isInter++r ((∘ , A) ∷ Γ') ([]left {∘ , B}) = refl
+ersL-isInter++r ((∘ , A) ∷ Γ') ([]left {∙ , B}) = refl
+ersL-isInter++r ((∘ , A) ∷ Γ') ([]right {∘ , B} {xs}) = cong ∷right (ersL-isInter++r Γ' []right)
+ersL-isInter++r ((∘ , A) ∷ Γ') ([]right {∙ , B} {xs}) = cong ∷right (ersL-isInter++r Γ' []right)
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷left {∘ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷left {∘ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷left {∙ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷left {∙ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷right {∘ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷right {∘ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷right {∙ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∘ , A) ∷ Γ') (∷right {∙ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') isInter[] = refl
+ersL-isInter++r ((∙ , A) ∷ Γ') ([]left {∘ , B}) = refl
+ersL-isInter++r ((∙ , A) ∷ Γ') ([]left {∙ , B}) = refl
+ersL-isInter++r ((∙ , A) ∷ Γ') ([]right {∘ , B} {xs}) = cong ∷right (ersL-isInter++r Γ' []right)
+ersL-isInter++r ((∙ , A) ∷ Γ') ([]right {∙ , B} {xs}) = cong ∷right (ersL-isInter++r Γ' []right)
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷left {∘ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷left {∘ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷left {∙ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷left {∙ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷left inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷right {∘ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷right {∘ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷right {∙ , B} {∘ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+ersL-isInter++r ((∙ , A) ∷ Γ') (∷right {∙ , B} {∙ , C} inTeq) = cong ∷right (ersL-isInter++r Γ' (∷right inTeq))
+
+ersL-∷right'∘ : {Γ₀ Γ₁ Γ : TCxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) 
+    → ersL-isInter (∷right' {x = (∘ , A)} Γ₀ inTeq) ≡ ∷right' {x = A} (ersL Γ₀) (ersL-isInter inTeq) -- ∷right' {x = A} (ersL Γ₀) (ersL-isInter inTeq)
+ersL-∷right'∘ isInter[] = refl
+ersL-∷right'∘ ([]left {∘ , B}) = refl
+ersL-∷right'∘ ([]left {∙ , B}) = refl
+ersL-∷right'∘ ([]right {∘ , B}) = refl
+ersL-∷right'∘ ([]right {∙ , B}) = refl
+ersL-∷right'∘ (∷left {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∘ (∷left {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷right'∘ (∷left {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∘ (∷left {∙ , B} {∙ , C} inTeq) = refl
+ersL-∷right'∘ (∷right {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∘ (∷right {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷right'∘ (∷right {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∘ (∷right {∙ , B} {∙ , C} inTeq) = refl
+
+
+ersL-∷right'∙ : {Γ₀ Γ₁ Γ : TCxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) 
+    → ersL-isInter (∷right' {x = (∙ , A)} Γ₀ inTeq) ≡ ∷right' {x = A} (ersL Γ₀) (ersL-isInter inTeq)
+ersL-∷right'∙ isInter[] = refl
+ersL-∷right'∙ ([]left {∘ , B}) = refl
+ersL-∷right'∙ ([]left {∙ , B}) = refl
+ersL-∷right'∙ ([]right {∘ , B}) = refl
+ersL-∷right'∙ ([]right {∙ , B}) = refl
+ersL-∷right'∙ (∷left {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∙ (∷left {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷right'∙ (∷left {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∙ (∷left {∙ , B} {∙ , C} inTeq) = refl
+ersL-∷right'∙ (∷right {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∙ (∷right {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷right'∙ (∷right {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷right'∙ (∷right {∙ , B} {∙ , C} inTeq) = refl
+-- {-# REWRITE ersL-∷right' #-}
+
+ersL-∷left'∘ : {Γ₀ Γ₁ Γ : TCxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) 
+    →  ersL-isInter (∷left' {x = (∘ , A)} Γ₁ inTeq) ≡ ∷left' {x = A} (ersL Γ₁) (ersL-isInter inTeq) 
+ersL-∷left'∘ isInter[] = refl
+ersL-∷left'∘ ([]left {∘ , B}) = refl
+ersL-∷left'∘ ([]left {∙ , B}) = refl
+ersL-∷left'∘ ([]right {∘ , B}) = refl
+ersL-∷left'∘ ([]right {∙ , B}) = refl
+ersL-∷left'∘ (∷left {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∘ (∷left {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷left'∘ (∷left {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∘ (∷left {∙ , B} {∙ , C} inTeq) = refl
+ersL-∷left'∘ (∷right {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∘ (∷right {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷left'∘ (∷right {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∘ (∷right {∙ , B} {∙ , C} inTeq) = refl
+
+ersL-∷left'∙ : {Γ₀ Γ₁ Γ : TCxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) 
+    →  ersL-isInter (∷left' {x = (∘ , A)} Γ₁ inTeq) ≡ ∷left' {x = A} (ersL Γ₁) (ersL-isInter inTeq) 
+ersL-∷left'∙ isInter[] = refl
+ersL-∷left'∙ ([]left {∘ , B}) = refl
+ersL-∷left'∙ ([]left {∙ , B}) = refl
+ersL-∷left'∙ ([]right {∘ , B}) = refl
+ersL-∷left'∙ ([]right {∙ , B}) = refl
+ersL-∷left'∙ (∷left {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∙ (∷left {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷left'∙ (∷left {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∙ (∷left {∙ , B} {∙ , C} inTeq) = refl
+ersL-∷left'∙ (∷right {∘ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∙ (∷right {∘ , B} {∙ , C} inTeq) = refl
+ersL-∷left'∙ (∷right {∙ , B} {∘ , C} inTeq) = refl
+ersL-∷left'∙ (∷right {∙ , B} {∙ , C} inTeq) = refl
 
 ersL-isInter++ : {Γ₀ Γ₁ Γ Δ₀ Δ₁ Δ : TCxt} → (inTeq1 : isInter Γ₀ Γ₁ Γ) (inTeq2 : isInter Δ₀ Δ₁ Δ)
     → ersL-isInter (isInter++ inTeq1 inTeq2) ≡ isInter++ (ersL-isInter inTeq1) (ersL-isInter inTeq2)
 ersL-isInter++ isInter[] inTeq2 = refl
 ersL-isInter++ ([]left {x} {xs}) inTeq2 = ersL-isInter++r (x ∷ xs) inTeq2
 ersL-isInter++ ([]right {x} {xs}) inTeq2 = ersL-isInter++l (x ∷ xs) inTeq2
-ersL-isInter++ (∷left inTeq1) inTeq2 = cong ∷left (ersL-isInter++ inTeq1 inTeq2)
-ersL-isInter++ (∷right inTeq1) inTeq2 = cong ∷right (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷left {∘ , A} {∘ , B} inTeq1) inTeq2 = cong ∷left (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷left {∘ , A} {∙ , B} inTeq1) inTeq2 = cong ∷left (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷left {∙ , A} {∘ , B} inTeq1) inTeq2 = cong ∷left (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷left {∙ , A} {∙ , B} inTeq1) inTeq2 = cong ∷left (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷right {∘ , A} {∘ , B} inTeq1) inTeq2 = cong ∷right (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷right {∘ , A} {∙ , B} inTeq1) inTeq2 = cong ∷right (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷right {∙ , A} {∘ , B} inTeq1) inTeq2 = cong ∷right (ersL-isInter++ inTeq1 inTeq2)
+ersL-isInter++ (∷right {∙ , A} {∙ , B} inTeq1) inTeq2 = cong ∷right (ersL-isInter++ inTeq1 inTeq2) 
 -- {-# REWRITE ersL-isInter++ #-}
 
-ersL-∷right' : {Γ₀ Γ₁ Γ : TCxt} {x : Tag} {(x , A) : TFma} → (inTeq : isInter Γ₀ Γ₁ Γ) → ersL-isInter (∷right' {x = (x , A)} Γ₀ inTeq) ≡ ∷right' {x = A} (ersL Γ₀) (ersL-isInter inTeq)
-ersL-∷right' isInter[] = refl
-ersL-∷right' []left = refl
-ersL-∷right' []right = refl
-ersL-∷right' (∷left inTeq) = refl
-ersL-∷right' (∷right inTeq) = refl
 
-{-# REWRITE ersL-∷right' #-}
-
-ersL-∷left' : {Γ₀ Γ₁ Γ : TCxt} {A : TFma} → (inTeq : isInter Γ₀ Γ₁ Γ) 
-    →  ∷left' {x = proj₂ A} (ersL Γ₁) (ersL-isInter inTeq) ≡ ersL-isInter (∷left' {x = A} Γ₁ inTeq) 
-ersL-∷left' isInter[] = refl
-ersL-∷left' []left = refl
-ersL-∷left' []right = refl
-ersL-∷left' (∷left inTeq) = refl
-ersL-∷left' (∷right inTeq) = refl
-
-
-
--- ersL-isInter-tag-lem' : {Γ Γ₀ Γ₁ : Cxt} (inTeq : isInter Γ₀ Γ₁ Γ) → ersL-isInter (tag-lem' inTeq) ≡ inTeq
+-- ersL-isInter-tag-lem' : {Γ Γ₀ Γ₁ : Cxt} (inTeq : isInter Γ₀ Γ₁ Γ) → ersL-isInter (tag-lem' inTeq) 
+--   ≡ {!   !}
+--   subst (λ x → isInter (ersL (tagL Γ₀)) x (ersL (tag-isInter inTeq))) (sym (blackErs Γ₁)) 
+--   (subst₂ (λ x → λ y → isInter x Γ₁ y) (sym (tagErs Γ₀)) (sym (tagers-isInter inTeq)) inTeq)
+-- ersL-isInter-tag-lem' isInter[] = refl
+-- ersL-isInter-tag-lem' ([]left {x} {[]}) = refl
+-- ersL-isInter-tag-lem' ([]left {x} {x₁ ∷ xs}) = {! ersL-isInter-tag-lem' ([]left {x = x₁} {xs})  !}
+-- ersL-isInter-tag-lem' []right = {!   !}
+-- ersL-isInter-tag-lem' (∷left inTeq) = {!   !}
+-- ersL-isInter-tag-lem' (∷right inTeq) = {!   !}
 -- ersL-isInter-tag-lem' isInter[] = refl
 -- ersL-isInter-tag-lem' []left = refl
 -- ersL-isInter-tag-lem' []right = refl
@@ -318,13 +431,13 @@ ersL-∷left' (∷right inTeq) = refl
 
 -- {-# REWRITE ersL-isInter-tag-lem' #-}
 
-tag-isInter++l : {Γ₀ Γ₁ Γ : Cxt} → (Γ' : Cxt) (inTeq : isInter Γ₀ Γ₁ Γ) → tag-isInter (isInter++l Γ' inTeq) ≡ (tagL Γ') ++ (tag-isInter inTeq)
-tag-isInter++l [] inTeq = refl
-tag-isInter++l (A ∷ Γ') isInter[] = refl
-tag-isInter++l (A ∷ Γ') []left = cong ((∘ , A) ∷_) (tag-isInter++l Γ' []left)
-tag-isInter++l (A ∷ Γ') []right = refl
-tag-isInter++l (A ∷ Γ') (∷left inTeq) = cong ((∘ , A) ∷_) (tag-isInter++l Γ' (∷left inTeq))
-tag-isInter++l (A ∷ Γ') (∷right inTeq) = cong ((∘ , A) ∷_) (tag-isInter++l Γ' (∷right inTeq))
+-- tag-isInter++l : {Γ₀ Γ₁ Γ : Cxt} → (Γ' : Cxt) (inTeq : isInter Γ₀ Γ₁ Γ) → tag-isInter (isInter++l Γ' inTeq) ≡ (tagL Γ') ++ (tag-isInter inTeq)
+-- tag-isInter++l [] inTeq = refl
+-- tag-isInter++l (A ∷ Γ') isInter[] = refl
+-- tag-isInter++l (A ∷ Γ') []left = cong ((∘ , A) ∷_) (tag-isInter++l Γ' []left)
+-- tag-isInter++l (A ∷ Γ') []right = refl
+-- tag-isInter++l (A ∷ Γ') (∷left inTeq) = cong ((∘ , A) ∷_) (tag-isInter++l Γ' (∷left inTeq))
+-- tag-isInter++l (A ∷ Γ') (∷right inTeq) = cong ((∘ , A) ∷_) (tag-isInter++l Γ' (∷right inTeq))
 
 tag-isInter++r : {Γ₀ Γ₁ Γ : Cxt} → (Γ' : Cxt) (inTeq : isInter Γ₀ Γ₁ Γ) → tag-isInter (isInter++r Γ' inTeq) ≡ (black Γ') ++ (tag-isInter inTeq)
 tag-isInter++r [] inTeq = refl
@@ -386,10 +499,10 @@ isInter++-tag-lem' (∷right inTeq1) inTeq2 = cong ∷right (isInter++-tag-lem' 
 -- {-# REWRITE isInter++-tag-lem' #-}
 
 
-tag-isInter-∷right' :  (Γ₀ : Cxt) {Γ₁ Γ : Cxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) →  tag-isInter (∷right' {x = A} Γ₀ inTeq) ≡ (∙ , A) ∷ (tag-isInter inTeq)
-tag-isInter-∷right' [] isInter[] = refl
-tag-isInter-∷right' [] []left = refl
-tag-isInter-∷right' (x ∷ Γ₀) inTeq = refl
+-- tag-isInter-∷right' :  (Γ₀ : Cxt) {Γ₁ Γ : Cxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) →  tag-isInter (∷right' {x = A} Γ₀ inTeq) ≡ (∙ , A) ∷ (tag-isInter inTeq)
+-- tag-isInter-∷right' [] isInter[] = refl
+-- tag-isInter-∷right' [] []left = refl
+-- tag-isInter-∷right' (x ∷ Γ₀) inTeq = refl
 {-# REWRITE tag-isInter-∷right' #-}
 
 tag-lem'-∷right' : {Γ₀ Γ₁ Γ : Cxt} {A : Fma} → (inTeq : isInter Γ₀ Γ₁ Γ) → ∷right' {x = (∙ , A)} (tagL Γ₀) (tag-lem' inTeq)  ≡ tag-lem' (∷right' {x = A} Γ₀ inTeq)
@@ -399,10 +512,10 @@ tag-lem'-∷right' []right = refl
 tag-lem'-∷right' (∷left inTeq) = refl
 tag-lem'-∷right' (∷right inTeq) = refl -- need
 
--- isInter-split-r-++-ersL-refl : {xs₀ xs₁ zs₀ zs₁ : TCxt} {ys₀ ys₁ : Cxt} → {A : Fma} → (inTeq1 : isInter xs₀ (black ys₀) zs₀) (inTeq2 : isInter xs₁ (black ys₁) zs₁) 
---         →  isInter-split-r ys₀ ys₁ refl (isInter++ (ersL-isInter inTeq1) (∷right' {x =  A} (ersL xs₁) (ersL-isInter inTeq2))) 
---             ≡ (ersL xs₀ , ersL xs₁ , ersL zs₀ , ersL zs₁ , ersL-isInter inTeq1 , ersL-isInter inTeq2 , refl , refl , refl)
--- isInter-split-r-++-ersL-refl {xs₁ = xs₁} inTeq1 inTeq2 = isInter-split-r-++-refl  (ersL-isInter inTeq1) (ersL-isInter inTeq2)
+-- -- isInter-split-r-++-ersL-refl : {xs₀ xs₁ zs₀ zs₁ : TCxt} {ys₀ ys₁ : Cxt} → {A : Fma} → (inTeq1 : isInter xs₀ (black ys₀) zs₀) (inTeq2 : isInter xs₁ (black ys₁) zs₁) 
+-- --         →  isInter-split-r ys₀ ys₁ refl (isInter++ (ersL-isInter inTeq1) (∷right' {x =  A} (ersL xs₁) (ersL-isInter inTeq2))) 
+-- --             ≡ (ersL xs₀ , ersL xs₁ , ersL zs₀ , ersL zs₁ , ersL-isInter inTeq1 , ersL-isInter inTeq2 , refl , refl , refl)
+-- -- isInter-split-r-++-ersL-refl {xs₁ = xs₁} inTeq1 inTeq2 = isInter-split-r-++-refl  (ersL-isInter inTeq1) (ersL-isInter inTeq2)
 
 ⊸r⋆seq⊸l :  {Γ Δ Δ₀ Δ₁' : Cxt} (Δ₁ : Cxt) {A B C : Fma}
     → (f : - ∣ Γ ⊢ A) (g : just B ∣ Δ ⊢ C) (inTeq : isInter Δ₀ Δ₁' Δ) (peq : Δ₁' ↭' Δ₁)
@@ -423,94 +536,272 @@ tag-lem'-∷right' (∷right inTeq) = refl -- need
 --     → (f : S ∣ Γ ⊢ A) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁) 
 --     → ⊸r⋆seq Γ₁ f (ersL-isInter (tag-lem' inTeq)) peq ≗ ⊸r⋆seq Γ₁ f inTeq peq
 -- ⊸r⋆seq-ersL-isInter-tag-lem' Γ₁ f inTeq peq = refl
+
 ersL++? : (Γ₀ Γ₁ : Cxt) → (Γ : TCxt)
     → (eq : ersL Γ ≡ Γ₀ ++ Γ₁) → Σ (TCxt) λ Γ₀' → Σ (TCxt) λ Γ₁' → Γ ≡ Γ₀' ++ Γ₁' × Γ₀ ≡ ersL Γ₀'  × Γ₁ ≡ ersL Γ₁'
-ersL++? Γ₀ Γ₁ [] eq with []++? {xs = Γ₀} {Γ₁} eq 
+ersL++? Γ₀ Γ₁ [] eq with []++? {xs = Γ₀} {Γ₁} eq
 ersL++? .[] .[] [] refl | refl , refl = [] , [] , refl , refl , refl
-ersL++? [] .(ersL (x ∷ Γ)) (x ∷ Γ) refl = [] , x ∷ Γ , refl , refl , refl
-ersL++? (x₁ ∷ Γ₀) Γ₁ (x ∷ Γ) eq with inj∷ eq
+ersL++? [] .(ersL ((∘ , A) ∷ Γ)) ((∘ , A) ∷ Γ) refl = [] , (∘ , A) ∷ Γ  , refl , refl , refl
+ersL++? (x ∷ Γ₀) Γ₁ ((∘ , A) ∷ Γ) eq with inj∷ eq
 ... | refl , eq1 with ersL++? Γ₀ Γ₁ Γ eq1
-ersL++? (.(proj₂ A) ∷ .(ersL Γ₀')) .(ersL Γ₁') (A ∷ .(Γ₀' ++ Γ₁')) refl | refl , eq1 | Γ₀' , Γ₁' , refl , refl , refl = A ∷ Γ₀' , Γ₁' , refl , refl , refl
+ersL++? (x ∷ .(ersL Γ₀')) .(ersL Γ₁') ((∘ , x) ∷ .(Γ₀' ++ Γ₁')) refl | refl , refl | Γ₀' , Γ₁' , refl , refl , refl = (∘ , x) ∷ Γ₀' , Γ₁' , refl , refl , refl
+ersL++? [] .(ersL ((∙ , A) ∷ Γ)) ((∙ , A) ∷ Γ) refl = [] , (∙ , A) ∷ Γ  , refl , refl , refl
+ersL++? (x ∷ Γ₀) Γ₁ ((∙ , A) ∷ Γ) eq with inj∷ eq
+... | refl , eq1 with ersL++? Γ₀ Γ₁ Γ eq1
+ersL++? (x ∷ .(ersL Γ₀')) .(ersL Γ₁') ((∙ , x) ∷ .(Γ₀' ++ Γ₁')) refl | refl , eq1 | Γ₀' , Γ₁' , refl , refl , refl = (∙ , x) ∷ Γ₀' , Γ₁' , refl , refl , refl
+
+-- pass-c'∙ : {Γ' Δ Γ'' : TCxt} {Γ Δ' : Cxt} {A C : Fma} → 
+--           (f : just A ∣ Γ ؛ Δ' ⊢c C) (eq : Γ' ≡ (∙ , A) ∷ Γ'') (eq1 : Γ ≡ ersL Γ'') (eq2 : Δ' ≡ ersL Δ) → 
+--           ------------------------------
+--                ∙ ∣ - ∣ Γ' ؛ Δ ⊢c C
+-- pass-c'∙ {Δ = Δ₁} {Γ'' = []} (ex {Γ = Γ} {Δ = []} {Λ} f refl refl) refl eq1 eq2 = {!   !}
+-- pass-c'∙ {Δ = Δ₁} {(∘ , snd) ∷ []} (ex {Γ = []} {Δ = []} {.(ersL Δ₁)} f refl refl) refl refl refl = {! ex∙ {Γ = (∙ , _) ∷ []} {[]} ? refl refl !} -- ex∙ {Δ = []} {!   !} refl refl
+-- pass-c'∙ {Δ = Δ₁} {(∘ , snd) ∷ x ∷ Γ''} (ex {Γ = []} {Δ = []} {.(ersL Δ₁)} f refl refl) refl eq1 refl = {!   !}
+-- pass-c'∙ {Δ = Δ₁} {(∙ , snd) ∷ Γ''} (ex {Γ = []} {Δ = []} {Λ} f refl refl) refl eq1 eq2 = {!   !}
+-- pass-c'∙ {Δ = Δ₁} {x ∷ Γ''} (ex {Γ = x₁ ∷ Γ} {Δ = []} {Λ} f refl refl) refl eq1 eq2 = {!   !}
+-- pass-c'∙ {Δ = Δ₁} (ex {Δ = x ∷ Δ} {Λ} f refl refl) refl eq1 eq2 = {!   !}
+-- pass-c'∙ (ri2c (⊸r f)) eq eq1 eq2 = {!   !}
+-- pass-c'∙ (ri2c (li2ri f)) eq eq1 eq2 = {!   !}
+
 mutual
-  emb⊸r⋆-ri∙' : {S : Stp} {Γ Γ₀ : TCxt} {Γ₁' : Cxt} (Γ₁ : Cxt) {A : Fma}
-      → (f : ∙ ∣ S ∣ Γ ⊢ri A)  (inTeq : isInter Γ₀ (black Γ₁') Γ) (peq : Γ₁' ↭' Γ₁)
-      → emb-ri∙ (⊸r⋆∙ Γ₁ f inTeq peq) refl ≗ ⊸r⋆seq Γ₁ (emb-ri∙ f refl) (subst (λ x → isInter (ersL Γ₀) x (ersL Γ)) (blackErs Γ₁') (ersL-isInter inTeq)) peq
-  emb⊸r⋆-ri∙' [] f isInter[] (empty refl) = refl
-  emb⊸r⋆-ri∙' [] f []right (empty refl) = refl
-  emb⊸r⋆-ri∙' {Γ = Γ} {Γ₀} (D ∷ Γ₁) f inTeq (cons {xs₀ = xs₀} {xs₁} refl peq) with isInter-split-r xs₀ xs₁ refl (subst (λ x → isInter (ersL Γ₀) x (ersL Γ)) (blackErs (xs₀ ++ D ∷ xs₁)) (ersL-isInter inTeq))
-  ... | Λ₀ , Λ₁ , Ψ₀ , Ψ₁ , inTeq1 , inTeq2 , eq1 , eq2 , eq3 with ersL++? Λ₀ Λ₁ Γ₀ eq1 | ersL++? Ψ₀ (D ∷ Ψ₁) Γ eq2
-  emb⊸r⋆-ri∙' {Γ = .(Ψ₀' ++ x ∷ Ψ₁')} {.(Λ₀' ++ Λ₁')} (.(proj₂ x) ∷ Γ₁) f inTeq (cons {xs₀ = xs₀} {xs₁} refl peq) | .(ersL Λ₀') , .(ersL Λ₁') , .(ersL Ψ₀') , .(ersL Ψ₁') , inTeq1 , inTeq2 , refl , refl , eq3 | Λ₀' , Λ₁' , refl , refl , refl | Ψ₀' , x ∷ Ψ₁' , refl , refl , refl = {! eq3  !}
+    c∙2c : {S : Stp} {Γ Δ : TCxt} {Γ' Δ' : Cxt} {C : Fma} 
+        → (f : ∙ ∣ S ∣ Γ ؛ Δ ⊢c C) (eq1 : Γ' ≡ ersL Γ) (eq2 : Δ' ≡ ersL Δ)
+        → S ∣ Γ' ؛ Δ' ⊢c C
+    c∙2c (ex∙ f refl refl) refl refl = ex (c∙2c f refl refl) refl refl -- ex (c∙2c f) refl refl
+    c∙2c (ri2c f) refl refl = ri2c (ri∙2ri f refl) -- ri2c (ri∙2ri f)  
+    ri∙2ri : {S : Stp} {Γ : TCxt} {Γ' : Cxt} {C : Fma} 
+        → (f : ∙ ∣ S ∣ Γ ⊢ri C) (eq : Γ' ≡ ersL Γ)
+        → S ∣ Γ' ⊢ri C
+    ri∙2ri (⊸r∙ (ex∙ (ex∙ {Γ = x ∷ Γ} f refl refl) eq' eq)) eq1 = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq'))) -- ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
+    ri∙2ri (⊸r∙ (ex∙ (ri2c f) refl refl)) refl = ⊸r (ex (ri2c (ri∙2ri f refl)) refl refl) -- ⊸r (ex (ri2c (ri∙2ri f)) refl refl)
+    ri∙2ri (li2ri f) refl = li2ri ((li∙2li f refl)) -- li2ri (li∙2li f)
+    li∙2li : {S : Stp} {Γ : TCxt} {Γ' : Cxt} {C : Pos}
+        → (f : ∙ ∣ S ∣ Γ ⊢li C) (eq : Γ' ≡ ersL Γ)
+        → S ∣ Γ' ⊢li C
+    li∙2li (p2li f) refl = p2li (p∙2p f refl)
+    p∙2p : {S : Irr} {Γ : TCxt} {Γ' : Cxt} {C : Pos}
+        → (f : ∙ ∣ S ∣ Γ ⊢p C) (eq : Γ' ≡ ersL Γ)
+        → S ∣ Γ' ⊢p C
+    p∙2p (pass∙ f refl) refl = pass f -- pass f
+    p∙2p (f2p f) refl = f2p (f∙2f f refl)
+    f∙2f : {S : Irr} {Γ : TCxt} {Γ' : Cxt} {C : Pos}
+        → (f : ∙ ∣ S ∣ Γ ⊢f C) (eq : Γ' ≡ ersL Γ)
+        → S ∣ Γ' ⊢f C
+    f∙2f ax refl = ax -- ax
+    f∙2f Ir refl = Ir -- Ir
+    f∙2f (⊗r∙ {Γ = Γ} f g refl refl) refl = ⊗r f g (sym (tagErsWhite Γ))
+    f∙2f (⊸l∙ f g refl refl refl) refl = ⊸l f g
+    
 
-  -- emb⊸r⋆-ri∙' {S = S} (D ∷ Γ₁) f inTeq (cons {xs₀ = xs₀} {xs₁} refl peq) with isInter-split-r (black xs₀) (black xs₁) refl inTeq
-  -- ... | Λ₀ , Λ₁ , Ψ₀ , Ψ₁ , inTeq1 , inTeq2 , refl , refl , refl 
-  --   rewrite isInter-split-r-++-refl {ys₀ = xs₀} {xs₁} {A = D} (ersL-isInter inTeq1) (ersL-isInter inTeq2) | 
-  --           ersL-isInter++ inTeq1 (∷right' {x = (∙ , D)} Λ₁ inTeq2) | isInter-split-r-++-refl {x = D} (ersL-isInter inTeq1)  (ersL-isInter inTeq2) | ersL-∷left' {A = (∙ , D)} inTeq2  =
-  --       ⊸r (cong-ex-fma-cxt (ersL Λ₀ ++ ersL Λ₁) (cong-ex-cxt-fma (ersL Λ₀) (emb⊸r⋆-ri∙' Γ₁ f (isInter++ inTeq1 (∷left' (black xs₁) inTeq2)) peq))) 
-  --       ≗∙ ⊸r (≡-to-≗ (ex-fma-cxt++ (ersL Λ₀) (ersL Λ₁) (_)) 
-  --       ≗∙ cong-ex-fma-cxt {Δ = []} (ersL Λ₁) (ex-fma-cxt-iso2 (ersL Λ₀) ≗∙ (≡-to-≗ (cong (λ x → ⊸r⋆seq Γ₁ (emb-ri∙ f) x peq) (trans (ersL-isInter++ inTeq1 (∷left' {x = (∙ , D)} (black xs₁) inTeq2)) refl)))))
+-- mutual
+--   emb-c∙emb-c : {S : Stp} {Γ Δ : TCxt} {Γ' Δ' : Cxt} {C : Fma}
+--     → (f : ∙ ∣ S ∣ Γ ؛ Δ ⊢c C) (eq1 : Γ' ≡ ersL Γ) (eq2 : Δ' ≡ ersL Δ)
+--     → emb-c∙ f eq1 eq2 ≗ emb-c (c∙2c f eq1 eq2)
+--   emb-c∙emb-c (ex∙ {Δ = Δ} f refl refl) refl refl = cong-ex-cxt-fma (ersL Δ) (emb-c∙emb-c f refl refl)
+--   emb-c∙emb-c (ri2c f) refl refl = emb-ri∙emb-ri f refl
+--   emb-ri∙emb-ri : {S : Stp} {Γ : TCxt} {Γ' : Cxt} {C : Fma}
+--     → (f : ∙ ∣ S ∣ Γ ⊢ri C) (eq : Γ' ≡ ersL Γ)
+--     → emb-ri∙ f eq ≗ emb-ri (ri∙2ri f eq)
+--   emb-ri∙emb-ri (⊸r∙ (ex∙ (ex∙ f eq'' eq₂) eq' eq₁)) eq = {!   !}
+--   emb-ri∙emb-ri (⊸r∙ (ex∙ {Δ = Δ} {Λ} (ri2c f) refl refl)) refl = ⊸r (cong-ex-fma-cxt (ersL Δ ++ ersL Λ) (cong-ex-cxt-fma (ersL Δ) (emb-ri∙emb-ri f refl))) -- ⊸r {! Δ Λ !}
+--   emb-ri∙emb-ri (li2ri f) refl = {!   !}
 
-  -- emb⊗r-f∙ : {S : Irr} {Γ : TCxt} {Δ : TCxt} {A B : Fma}
-  --     → (f : ∙ ∣ irr S ∣ whiteL Γ ⊢ri A) (g : - ∣ ersL Δ ⊢ri B)
-  --     → emb-f∙ {S = S} (⊗r {Γ = Γ} {Δ = Δ} f g) ≗ ⊗r {Γ = ersL (whiteL Γ)} {ersL Δ} (emb-ri∙ f) (emb-ri g)
-  -- emb⊗r-f∙ {Γ = Γ} f g rewrite sym (whiteErs Γ) = refl 
+emb-p∙pass-lem : (Γ : Cxt) {Γ' : TCxt} {A : Fma} {C : Pos}
+   → (f : just A ∣ Γ ⊢li C) (eq : Γ ≡ ersL Γ')
+   → emb-ri∙ (li2ri (p2li (pass∙ {Γ = Γ'} f eq))) (cong (A ∷_) eq) ≗ pass (emb-li f)
+emb-p∙pass-lem .(ersL Γ') {Γ' = Γ'} f refl = refl
+emb-f-⊸l-lem : {Γ Γ' Λ Δ : TCxt} {Γ'' Δ' : Cxt} {A B D : Fma} {C : Pos}
+  → (f : - ∣ Γ'' ⊢ri A) (g : just B ∣ Δ' ⊢li C)  (eq1 : Γ'' ≡ ersL Γ ++ D ∷ ersL Λ) (eq2 : Δ' ≡ ersL Δ)
+  → emb-ri∙ (li2ri (p2li (f2p (⊸l∙ {Γ = Γ} {Λ = Λ} {Δ = Δ} f g refl eq1 eq2)))) ((cong₂ (_++_) eq1 eq2)) ≡ ⊸l (emb-ri f) (emb-li g)
+emb-f-⊸l-lem f g refl refl = refl
   
+-- ====================================
+{-# REWRITE tagErsWhite #-} 
+-- The term unification is solvable in second order equality with REWRITE tagErsWhite.
+emb-f-⊗r-lem'' : (Γ : TCxt) → whiteErs Γ ≡ tagErs (ersL Γ)
+emb-f-⊗r-lem'' [] = refl
+emb-f-⊗r-lem'' ((∘ , snd) ∷ Γ) = cong (λ x → cong (snd ∷_) x) (emb-f-⊗r-lem'' Γ)
+emb-f-⊗r-lem'' ((∙ , snd) ∷ Γ) = cong (λ x → cong (snd ∷_) x) (emb-f-⊗r-lem'' Γ)
+emb-f-⊗r-lem' : {S : Irr} (Γ : TCxt) {A : Fma}
+  → (f : ∙ ∣ irr S ∣ whiteL Γ ⊢ri A)
+  → emb-ri∙ f (sym (whiteErs Γ)) ≡ emb-ri∙ f (sym (tagErs (ersL Γ)))
+emb-f-⊗r-lem' Γ f rewrite emb-f-⊗r-lem'' Γ = refl
+emb-f-⊗r-lem : {S : Irr} {Γ' Γ'' Δ : TCxt}  {Γ Δ' : Cxt} {A B : Fma} 
+  → (f :  ∙ ∣ irr S ∣ Γ'' ⊢ri A) → (g : - ∣ Δ' ⊢ri B) (eq : Γ'' ≡ whiteL Γ') (eq1 : Γ'' ≡ tagL Γ) (eq2 : Δ' ≡ ersL Δ) (eq3 : Γ ≡ ersL Γ')
+  → emb-ri∙ (li2ri (p2li {S = S} (f2p (⊗r∙ {Γ = Γ'} {Δ = Δ} f g eq eq2)))) (cong₂ _++_ eq3 eq2) 
+    ≡ ⊗r (emb-ri∙ (subst (λ x → ∙ ∣ irr S ∣ x ⊢ri A) eq1 f) (sym (tagErs Γ))) (emb-ri g)
+emb-f-⊗r-lem {S = S} {Γ' = Γ'} {Δ = Δ} f g refl refl refl refl = cong₂ (⊗r {Δ = ersL Δ}) (emb-f-⊗r-lem' {S = S} Γ' f) refl
+-- ==================================== 
+
+-- emb⊸r⋆-ri∙'-lem : 
+--   → (inTeq1' : isInter Λ₀ (black xs₀) Ψ₀) (inTeq1'' : isInter Λ₁ (black xs₁) Ψ₁) (inTeq2 : isInter (ersL Λ₀ ++ ersL Λ₁) (xs₀ ++ x ∷ xs₁) (ersL Ψ₀ ++ x ∷ ersL Ψ₁))
+--   → 
+-- ============
+-- {-# REWRITE blackErs #-}
+-- ============
+
+mutual
+  -- emb⊸r⋆-ri∙' : {S : Stp} {Γ Γ₀ Γ₁'' : TCxt} {Γ' Γ₀' Γ₁' : Cxt} (Γ₁ : Cxt) {A : Fma}
+  --     → (f : ∙ ∣ S ∣ Γ ⊢ri A) (inTeq1 : isInter Γ₀ Γ₁'' Γ) (inTeq2 : isInter Γ₀' Γ₁' Γ') (peq : Γ₁' ↭' Γ₁) 
+  --     → (eq : Γ' ≡ ersL Γ) (eq1 : Γ₀' ≡ ersL Γ₀) (eq2 : Γ₁'' ≡ black Γ₁')
+  --     → emb-ri∙ (⊸r⋆∙ Γ₁ f inTeq1 peq eq2) eq1 ≗ ⊸r⋆seq Γ₁ (emb-ri∙ f eq) inTeq2 peq
+  -- emb⊸r⋆-ri∙' [] f isInter[] isInter[] (empty refl) refl refl refl = refl
+  -- emb⊸r⋆-ri∙' [] f []right isInter[] (empty refl) eq1 eq2 eq3 = {!   !} -- imposs
+  -- emb⊸r⋆-ri∙' {Γ = (∘ , A) ∷ Γ} [] f []right ([]right {.A}) (empty refl) refl refl refl = refl
+  -- emb⊸r⋆-ri∙' {Γ = (∙ , A) ∷ Γ} [] f []right ([]right {.A}) (empty refl) refl refl refl = refl
+  -- emb⊸r⋆-ri∙' (x ∷ Γ₁) f inTeq1 inTeq2 (cons {xs₀ = xs₀} {xs₁} refl peq) refl refl refl with isInter-split-r (black xs₀) (black xs₁) refl inTeq1
+  -- ... | Λ₀ , Λ₁ , Ψ₀ , Ψ₁ , inTeq1' , inTeq1'' , refl , refl , refl = {!   !}
+  -- with isInter-split-r xs₀ xs₁ refl inTeq2
+  -- ... | Ω₀ , Ω₁ , Φ₀ , Φ₁ , inTeq2' , inTeq2'' , eq1 , eq2 , eq3 = {!   !} 
+  
+  -- emb⊸r⋆-ri∙' : {S : Stp} {Γ Γ₀ : TCxt} {Γ' Γ₀' Γ₁' : Cxt} (Γ₁ : Cxt) {A : Fma}
+  --     → (f : ∙ ∣ S ∣ Γ ⊢ri A) (inTeq : isInter Γ₀ (black Γ₁') Γ) (peq : Γ₁' ↭' Γ₁) 
+  --     → (eq : Γ' ≡ ersL Γ) (eq1 : Γ₀' ≡ ersL Γ₀)
+  --     → emb-ri∙ (⊸r⋆∙ Γ₁ f inTeq peq refl) eq1 ≗ ⊸r⋆seq Γ₁ (emb-ri∙ f eq) (subst₂ (λ x → λ y → isInter x Γ₁' y) (sym eq1) (sym eq) (ersL-isInter inTeq)) peq
+-- we cannot have subst here because in emb⊗r-p and emb⊗r-f, eq1 is not refl, so the subst doesn't rewrite.
+--  emb⊸r⋆-ri∙' : {S : Stp} {Γ Γ₀ Γ₁'' : TCxt} {Γ' Γ₀' Γ₁' : Cxt} (Γ₁ : Cxt) {A : Fma}
+--       → (f : ∙ ∣ S ∣ Γ ⊢ri A) (inTeq1 : isInter Γ₀ (black Γ₁') Γ) (peq : Γ₁' ↭' Γ₁) -- blackErs Γ₁' is not refl, so the subst never rewrites
+--       → emb-ri∙ (⊸r⋆∙ Γ₁ f inTeq1 peq refl) refl ≗ ⊸r⋆seq Γ₁ (emb-ri∙ f refl) (subst (λ x → isInter (ersL Γ₀) x (ersL Γ)) (blackErs Γ₁') (ersL-isInter inTeq1)) peq
+
+  emb⊸r⋆-ri∙' : {S : Stp} {Γ Γ₀ : TCxt} {Γ₀' Γ₁' : Cxt} (Γ₁ : Cxt) {A : Fma}
+        → (f : ∙ ∣ S ∣ Γ ⊢ri A) (inTeq : isInter Γ₀ (black Γ₁') Γ) (peq : Γ₁' ↭' Γ₁) (eq : Γ₀' ≡ ersL Γ₀)
+        → emb-ri∙ (⊸r⋆∙ Γ₁ f inTeq peq refl) eq ≗ ⊸r⋆seq Γ₁ (emb-ri∙ f refl) (subst (λ x → isInter x Γ₁' (ersL Γ)) (sym eq) (subst (λ x → isInter (ersL Γ₀) x (ersL Γ)) (blackErs Γ₁') (ersL-isInter inTeq))) peq
+  emb⊸r⋆-ri∙' [] f isInter[] (empty refl) refl = refl
+  emb⊸r⋆-ri∙' [] f []right (empty refl) refl = {!   !}
+  emb⊸r⋆-ri∙' (x ∷ Γ₁) f inTeq (cons {xs₀ = xs₀} {xs₁} refl peq) refl with isInter-split-r (black xs₀) (black xs₁) refl inTeq
+  ... | Λ₀ , Λ₁ , Ψ₀ , Ψ₁ , inTeq1 , inTeq2 , refl , refl , refl 
+    rewrite ersL-isInter++ inTeq1 (∷right' {x = (∙ , x)} Λ₁ inTeq2) | ersL-∷right'∙ {A = x} inTeq2 = {! blackErs++  !}
+
 --   emb⊗r-f : {S : Irr} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A : Pos} {B : Fma}
 --       → (f : S ∣ Γ ⊢f A) (g : - ∣ Δ ⊢ri B) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁)
 --       → emb-f (gen⊗r-f Γ₁ f g inTeq peq) ≗ ⊗r (⊸r⋆seq Γ₁ (emb-f f) inTeq peq) (emb-ri g)
---   emb⊗r-f {Γ₀ = Γ₀} {Γ₁'} Γ₁ ax g inTeq peq with []++ {xs = Γ₀} {Γ₁'} (isInter-end[] inTeq)
---   ... | refl , refl with empty↭' peq
---   ... | refl = ⊗r (~ (⊸r⋆seq[] {inTeq = inTeq} {peq})) refl
---   emb⊗r-f {Γ₀ = Γ₀} {Γ₁'} Γ₁ Ir g inTeq peq with []++ {xs = Γ₀} {Γ₁'} (isInter-end[] inTeq)
---   ... | refl , refl with empty↭' peq
---   ... | refl = ⊗r (~ (⊸r⋆seq[] {inTeq = inTeq} {peq})) refl
---   emb⊗r-f Γ₁ (⊗r {Γ = Γ} {Δ} f g) h inTeq peq with isInter++? Γ Δ refl inTeq
---   ... | Γ₀₀ , Γ₀₁ , Γ₁₀' , Γ₁₁' , inTeq , inTeq' , refl , refl , refl 
---     rewrite sym (whiteErs (tag-isInter {Γ = Γ} inTeq)) = {!  tagers-isInter inTeq' !}
---         -- ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (f2p (⊗r {Γ = tag-isInter inTeq} {tag-isInter inTeq'} f g)))) (tag-lem' (isInter++ inTeq inTeq')) peq 
---         -- ≗∙ (cong⊸r⋆seq Γ₁ (emb⊗r-f∙ {Γ = tag-isInter inTeq} {Δ = tag-isInter inTeq'} f g) ≗∙ ⊸r⋆seq-ersL-isInter-tag-lem' Γ₁ (⊗r (emb-ri∙ f) (emb-ri g)) (isInter++ inTeq inTeq') peq)) refl
-
+--   emb⊗r-f {Γ₀ = .[]} {.[]} .[] ax g isInter[] (empty refl) = refl
+--   emb⊗r-f {Γ₀ = .[]} {.[]} .(_ ∷ _) ax g isInter[] (cons {xs₀ = xs₀} x peq) = ⊥-elim ([]disj∷ xs₀ x)
+--   emb⊗r-f {Γ₀ = .[]} {.[]} .[] Ir g isInter[] (empty refl) = refl
+--   emb⊗r-f {Γ₀ = .[]} {.[]} .(_ ∷ _) Ir g isInter[] (cons {xs₀ = xs₀} x peq) = ⊥-elim ([]disj∷ xs₀ x)
+--   emb⊗r-f Γ₁ (⊗r {Γ = Γ} {Δ} f g refl) h inTeq peq with isInter++? Γ Δ refl inTeq
+--   ... | Γ₀₀ , Γ₀₁ , Γ₁₀' , Γ₁₁' , inTeq , inTeq' , refl , refl , refl = 
+--     ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (f2p (⊗r∙ f g (sym (whiteL-isInter inTeq)) (sym (tagers-isInter inTeq')))))) (isInter++ (tag-lem' inTeq) (tag-lem' inTeq')) (isInter++ inTeq inTeq') peq (cong₂ (_++_) (sym (tagers-isInter inTeq)) (sym (tagers-isInter inTeq'))) (sym (tagErs (Γ₀₀ ++ Γ₀₁))) refl 
+--     ≗∙ cong⊸r⋆seq Γ₁ {inTeq = isInter++ inTeq inTeq'} {peq} (≡-to-≗ (emb-f-⊗r-lem {Γ' = tag-isInter inTeq} {Δ = tag-isInter inTeq'} f g (sym (whiteL-isInter inTeq)) refl (sym (tagers-isInter inTeq')) (sym (tagers-isInter inTeq))))) refl
+-- -- emb-f-⊗r-lem {Γ' = tag-isInter inTeq} {Δ = tag-isInter inTeq'} f g (sym (whiteL-isInter inTeq)) refl (sym (tagers-isInter inTeq')) (sym (tagers-isInter inTeq))
 --   emb⊗r-f Γ₁ (⊸l {Γ} {Δ} f g) h inTeq peq with isInter++? Γ Δ refl inTeq
 --   ... | Γ₀₀ , Γ₀₁ , [] , Γ₁₁' , inTeq1 , inTeq2 , refl , refl , refl with isInter-left[] inTeq1
 --   ... | refl = ⊸l refl (emb⊗r-li Γ₁ g h inTeq2 peq) ≗∙ ((~ ⊗r⊸l) ≗∙ (~ (⊗r (⊸r⋆seq⊸l Γ₁ (emb-ri f) (emb-li g) (inTeq2) peq) refl)))
 --   emb⊗r-f Γ₁ (⊸l {Γ} {Δ} f g) h inTeq peq | Γ₀₀ , Γ₀₁ , D ∷ Γ₁₀' , Γ₁₁' , inTeq1 , inTeq2 , refl , refl , refl with isInter-split-r [] Γ₁₀' refl inTeq1
---   ... | Γ₀₀₀ , Γ₀₀₁ , Γ'' , Γ''' , inTeq3 , inTeq4 , refl , refl , refl with isInter-left[] inTeq3
---   ... | refl with tag-lem-left[] inTeq3
---   ... | .(tagL Γ₀₀₀) , inTeq3' , refl 
---     rewrite tag-lem'-∷right' {A = D} (isInter++ inTeq4 inTeq2) |
---             isInter++l-tag-lem' Γ₀₀₀ (∷right' {x = D} (Γ₀₀₁ ++ Γ₀₁) (isInter++ inTeq4 inTeq2)) |
---             sym (isInter++l-assoc {xs₁ = Γ₀₀₀} (∷right' {x = D} Γ₀₀₁ inTeq4) inTeq2) |
---             isInter++-∷right' {x = D} Γ₀₀₁ inTeq4 inTeq2 = {!   !}
---             -- ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (f2p (⊸l∙ {Γ' = tagL Γ₀₀₀ ++ (∙ , D) ∷ tag-isInter inTeq4} {Λ = tag-isInter inTeq4} {Δ = tag-isInter inTeq2} f g refl)))) (tag-lem' (isInter++l Γ₀₀₀ (∷right' (Γ₀₀₁ ++ Γ₀₁) (isInter++ inTeq4 inTeq2)))) peq 
---             -- ≗∙ ⊸r⋆seq-ersL-isInter-tag-lem' Γ₁ (⊸l (emb-ri f) (emb-li g)) (isInter++l Γ₀₀₀ (∷right' (Γ₀₀₁ ++ Γ₀₁) (isInter++ inTeq4 inTeq2))) peq) refl
+--   ... | .[] , Γ₀₀₁ , .[] , Γ''' , isInter[] , inTeq4 , refl , refl , refl = 
+--     ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (f2p 
+--     (⊸l∙ f g refl 
+--     (cong (_∷_ D) (sym (tagers-isInter inTeq4))) 
+--     (sym (tagers-isInter inTeq2)))))) 
+--     (∷right' (tagL Γ₀₀ ++ tagL Γ₀₁) (isInter++ (tag-lem' inTeq4) (tag-lem' inTeq2)))  
+--     (isInter++ (∷right' Γ₀₀ inTeq4) inTeq2) peq 
+--     ((cong₂ (_++_) (cong (_∷_ D) (sym (tagers-isInter inTeq4))) (sym (tagers-isInter inTeq2)))) ((sym (tagErs (Γ₀₀ ++ Γ₀₁)))) refl 
+--     ≗∙ cong⊸r⋆seq Γ₁ {inTeq = isInter++ (∷right' Γ₀₀ inTeq4) inTeq2} {peq} 
+--     (≡-to-≗ (emb-f-⊸l-lem {Γ = []} {Γ' = (∙ , D) ∷ tag-isInter inTeq4} {Λ = tag-isInter inTeq4} {Δ = tag-isInter inTeq2} f g 
+--     (cong (_∷_ D) (sym (tagers-isInter inTeq4))) 
+--     (sym (tagers-isInter inTeq2))))) refl
+--   emb⊗r-f Γ₁ (⊸l {.((x ∷ xs) ++ D ∷ Γ''')} {Δ} f g) h .(isInter++ (isInter++ []right (∷right' Γ₀₀₁ inTeq4)) inTeq2) peq | .((x ∷ xs) ++ Γ₀₀₁) , Γ₀₁ , D ∷ Γ₁₀' , Γ₁₁' , .(isInter++ []right (∷right' Γ₀₀₁ inTeq4)) , inTeq2 , refl , refl , refl | .(x ∷ xs) , Γ₀₀₁ , .(x ∷ xs) , Γ''' , []right {x} {xs} , inTeq4 , refl , refl , refl = 
+--     ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (f2p 
+--     (⊸l∙ f g refl 
+--     (sym (cong₂ _++_ (cong (_∷_ x) (tagErs xs)) (cong (_∷_ D) (tagers-isInter inTeq4)))) 
+--     (sym (tagers-isInter inTeq2)))))) 
+--     (∷left (isInter++l (tagL xs) (∷right' (tagL Γ₀₀₁ ++ tagL Γ₀₁) (isInter++ (tag-lem' inTeq4) (tag-lem' inTeq2))))) 
+--     (∷left (isInter++ (isInter++l xs (∷right' Γ₀₀₁ inTeq4)) inTeq2)) peq 
+--     (cong₂ (_++_) (sym (cong₂ _++_ (cong (_∷_ x) (tagErs xs)) (cong (_∷_ D) (tagers-isInter inTeq4)))) (sym (tagers-isInter inTeq2))) (sym (cong (_∷_ x) (tagErs (xs ++ Γ₀₀₁ ++ Γ₀₁)))) refl 
+--     ≗∙ cong⊸r⋆seq Γ₁ {inTeq = ∷left (isInter++ (isInter++l xs (∷right' Γ₀₀₁ inTeq4)) inTeq2)} {peq} 
+--     (≡-to-≗ (emb-f-⊸l-lem {Γ = (∘ , x) ∷ tagL xs} {Γ' = (∘ , x) ∷ tagL xs ++ (∙ , D) ∷ tag-isInter inTeq2} {Λ = tag-isInter inTeq4} {Δ = tag-isInter inTeq2} f g (sym (cong₂ _++_ (cong (_∷_ x) (tagErs xs)) (cong (_∷_ D) (tagers-isInter inTeq4)))) (sym (tagers-isInter inTeq2))))) refl
+  lem' : {Γ₀ Γ₁' Γ : Cxt} {Γ' : TCxt} {A' D : Fma} {A : Pos} (Γ₁ : Cxt)
+    → (f : just A' ∣ Γ ⊢li A) (inTeq : isInter (D ∷ Γ₀) Γ₁' (ersL Γ')) (peq : A' ∷ Γ₁' ↭' Γ₁) (eq : Γ ≡  ersL Γ')
+    → ⊸r⋆seq Γ₁ (emb-p∙ (pass∙ {Γ = Γ'} f eq)) (∷right inTeq)
+      peq
+      ≗ ⊸r⋆seq Γ₁ (pass (emb-li f)) (∷right (subst (λ x → isInter (D ∷ Γ₀) Γ₁' x) (sym (eq)) inTeq)) peq
+  lem' Γ₁ f inTeq peq refl = refl
+  lem : {Γ₀ Γ₁' Γ : Cxt} {A' D : Fma} {A : Pos} (Γ₁ : Cxt)
+    → (f : just A' ∣ Γ ⊢li A) (inTeq : isInter (D ∷ Γ₀) Γ₁' Γ) (peq : A' ∷ Γ₁' ↭' Γ₁) (eq : Γ ≡ ersL (tag-isInter inTeq))
+    → ⊸r⋆seq Γ₁ (emb-p∙ (pass∙ {Γ = tag-isInter inTeq} f eq)) (subst
+       (λ x₁ → isInter x₁ (A' ∷ Γ₁') (A' ∷ ersL (tag-isInter inTeq)))
+       (sym (sym (cong (_∷_ D) (tagErs Γ₀))))
+       (subst
+        (λ x₁ →
+           isInter (D ∷ ersL (tagL Γ₀)) x₁ (A' ∷ ersL (tag-isInter inTeq)))
+        (cong (_∷_ A') (blackErs Γ₁'))
+        (∷right (ersL-isInter (tag-lem' inTeq)))))
+      peq
+      ≗ ⊸r⋆seq Γ₁ (pass (emb-li f)) (∷right inTeq) peq
+  lem Γ₁ f inTeq peq eq = {! eq  !}
+  ∷right-subst-lem1 : {Γ₀ Γ₁ Γ Γ₀' : Cxt} {A A' B : Fma} → (inTeq : isInter (A ∷ Γ₀) Γ₁ Γ)
+    → (eq : A ∷ Γ₀ ≡ A' ∷ Γ₀')
+    → subst (λ x → isInter x (B ∷ Γ₁) (B ∷ Γ)) eq (∷right inTeq) ≡ ∷right (subst (λ x → isInter x  Γ₁  Γ) eq inTeq)
+  ∷right-subst-lem1 inTeq refl = refl
+  ∷right-subst-lem2 : {Γ₀ Γ₁ Γ Γ₁' : Cxt} {A B : Fma} → (inTeq : isInter (A ∷ Γ₀) Γ₁ Γ)
+    → (eq : Γ₁ ≡ Γ₁')
+    → subst (λ x → isInter (A ∷ Γ₀) x (B ∷ Γ)) (cong (B ∷_) eq) (∷right inTeq) ≡ ∷right (subst (λ x → isInter (A ∷ Γ₀) x  Γ) eq inTeq)
+  ∷right-subst-lem2 inTeq refl = refl
+  ∷right-subst-lem3 : {Γ₀ Γ₁ Γ Γ' : Cxt} {A B : Fma} → (inTeq : isInter (A ∷ Γ₀) Γ₁ Γ)
+    → (eq : Γ ≡ Γ')
+    → subst (λ x → isInter (A ∷ Γ₀) (B ∷ Γ₁) x) (cong (B ∷_) eq) (∷right inTeq) ≡ ∷right (subst (λ x → isInter (A ∷ Γ₀) Γ₁ x) eq inTeq)
+  ∷right-subst-lem3 inTeq refl = refl
+  subst3-lem : {Γ₀ Γ₁ Γ : Cxt} {A : Fma} (inTeq : isInter (A ∷ Γ₀) Γ₁ Γ)
+    → inTeq ≡ subst (isInter (A ∷ Γ₀) Γ₁) (tagers-isInter inTeq) (subst (λ y → isInter y Γ₁ (ersL (tag-isInter inTeq)))
+    (cong (_∷_ A) (tagErs Γ₀)) (subst (λ y → isInter (A ∷ ersL (tagL Γ₀)) y (ersL (tag-isInter inTeq))) (blackErs Γ₁)   (ersL-isInter (tag-lem' inTeq))))
+  subst3-lem []right = {!   !}
+  subst3-lem (∷left inTeq) = {!   !}
+  subst3-lem {Γ₀ = Γ₀} {A = A} (∷right {y = y} {ys = ys} inTeq) = trans (trans (trans (cong ∷right (subst3-lem inTeq)) (sym (∷right-subst-lem3 _ (tagers-isInter inTeq)))) (sym (cong (λ x → subst (isInter (A ∷ Γ₀) (y ∷ ys))
+      (cong (_∷_ y) (tagers-isInter inTeq)) x) (∷right-subst-lem1 _ (cong (_∷_ A) (tagErs Γ₀)) )))) (sym (cong (λ x → subst (isInter (A ∷ Γ₀) (y ∷ ys))
+      (cong (_∷_ y) (tagers-isInter inTeq))
+      (subst (λ y₁ → isInter y₁ (y ∷ ys) (y ∷ ersL (tag-isInter inTeq)))
+       (cong (_∷_ A) (tagErs Γ₀)) x)) (∷right-subst-lem2 (ersL-isInter (tag-lem' inTeq)) (blackErs ys))))
+  sym-sym : {A : Set} → {a b : A} → (p : a ≡ b) → sym (sym p) ≡ p
+  sym-sym refl = refl
+  emb⊗r-p : {S : Irr} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A : Pos} {B : Fma}
+      → (f : S ∣ Γ ⊢p A) (g : - ∣ Δ ⊢ri B) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁)
+      → emb-p (gen⊗r-p Γ₁ f g inTeq peq) ≗ ⊗r (⊸r⋆seq Γ₁ (emb-p f) inTeq peq) (emb-ri g)
 
---   emb⊗r-p : {S : Irr} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A : Pos} {B : Fma}
---       → (f : S ∣ Γ ⊢p A) (g : - ∣ Δ ⊢ri B) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁)
---       → emb-p (gen⊗r-p Γ₁ f g inTeq peq) ≗ ⊗r (⊸r⋆seq Γ₁ (emb-p f) inTeq peq) (emb-ri g)
---   emb⊗r-p Γ₁ (pass f) g []left peq = {!   !} -- ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (pass∙ f))) []left peq) refl 
---   emb⊗r-p Γ₁ (pass f) g []right peq with empty↭' peq
---   emb⊗r-p {Γ = A ∷ Γ} .[] (pass f) g []right (empty refl) | refl = 
---     pass (emb⊗r-li [] f g ([]right' Γ) (empty refl)) 
---     ≗∙ ((~ ⊗rpass) ≗∙ ⊗r (pass (⊸r⋆seq[] {inTeq = []right' Γ} {empty refl})) refl)
---   emb⊗r-p Γ₁ (pass f) g (∷left inTeq) peq = 
---     pass (emb⊗r-li Γ₁ f g inTeq peq) ≗∙ ((~ ⊗rpass) ≗∙ ⊗r (~ (⊸r⋆seqpass Γ₁ inTeq peq)) refl)
---   emb⊗r-p Γ₁ (pass f) g (∷right {y = A'} inTeq) peq = {!   !}
---     --  = ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (pass∙ f))) (tag-lem' (∷right inTeq)) peq ≗∙ ⊸r⋆seq-ersL-isInter-tag-lem' Γ₁ (pass (emb-li f)) (∷right inTeq) peq) refl 
---   emb⊗r-p Γ₁ (f2p f) g inTeq peq = {!   !} -- emb⊗r-f Γ₁ f g inTeq peq
 
---   emb⊗r-li : {S : Stp} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A : Pos} {B : Fma}
---       → (f : S ∣ Γ ⊢li A) (g : - ∣ Δ ⊢ri B) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁)
---       → emb-li (gen⊗r-li Γ₁ f g inTeq peq) ≗ ⊗r (⊸r⋆seq Γ₁ (emb-li f) inTeq peq) (emb-ri g)
---   emb⊗r-li Γ₁ (Il f) g inTeq peq = Il (emb⊗r-li Γ₁ f g inTeq peq) 
---     ≗∙ ((~ (⊗rIl)) 
---     ≗∙ (~ (⊗r (⊸r⋆seqIl Γ₁ {inTeq = inTeq} {peq}) refl)))
---   emb⊗r-li Γ₁ (⊗l (ex (ex {Γ = x ∷ Γ} f refl refl) eq' eq₁)) g inTeq peq = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
---   emb⊗r-li Γ₁ (⊗l (ex {Δ = Δ} {Λ} (ri2c (li2ri f)) refl refl)) g inTeq peq with isInter++? Δ Λ refl inTeq
---   ... | Λ₀ , Λ₁ , Ψ₀ , Ψ₁ , inTeq1 , inTeq2 , refl , refl , refl = 
---     ⊗l (cong-ex-cxt-fma Λ₀ (emb⊗r-li Γ₁ f g (isInter++ inTeq1 (∷left' Ψ₁ inTeq2)) peq)) 
---     ≗∙ (⊗l (ex-cxt-fma-⊗r₁ [] Λ₀) ≗∙ (((~ ⊗r⊗l) 
---     ≗∙ ⊗r (⊗l (ex-cxt-fma-⊸r⋆seq Γ₁ Δ Λ {inTeq1 = inTeq1} {inTeq2} {peq})) refl) 
---     ≗∙ ⊗r (~ (⊸r⋆seq⊗l Γ₁ {inTeq = (isInter++ inTeq1 inTeq2)} {peq})) refl))
---   emb⊗r-li Γ₁ (p2li f) g inTeq peq = emb⊗r-p Γ₁ f g inTeq peq
+  emb⊗r-p Γ₁ (pass {Γ} {A = A} f) g []left peq rewrite blackErs Γ | tagers-isInter ([]left' Γ) = {!   !} 
+    -- ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (pass∙ f (sym (blackErs Γ))))) []left []left peq (cong (A ∷_) (sym (blackErs Γ))) refl refl 
+    -- ≗∙ cong⊸r⋆seq Γ₁ {inTeq = []left} {peq} (emb-p∙pass-lem Γ {Γ' = black Γ} f (sym (blackErs Γ)))) refl 
+  emb⊗r-p Γ₁ (pass f) g []right peq with empty↭' peq
+  emb⊗r-p {Γ = A ∷ Γ} .[] (pass f) g []right (empty refl) | refl = 
+    pass (emb⊗r-li [] f g ([]right' Γ) (empty refl)) 
+    ≗∙ ((~ ⊗rpass) ≗∙ ⊗r (pass (⊸r⋆seq[] {inTeq = []right' Γ} {empty refl})) refl)
+  emb⊗r-p Γ₁ (pass f) g (∷left inTeq) peq = 
+    pass (emb⊗r-li Γ₁ f g inTeq peq) ≗∙ ((~ ⊗rpass) ≗∙ ⊗r (~ (⊸r⋆seqpass Γ₁ inTeq peq)) refl)
+  emb⊗r-p Γ₁ (pass {Γ = Γ} f) g (∷right {x} {y = A'} {xs} {ys} inTeq) peq = 
+    ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (pass∙ f (sym (tagers-isInter inTeq)))))  (∷right (tag-lem' inTeq)) peq (sym (cong (_∷_ x) (tagErs xs))) ≗∙ (≡-to-≗ (cong (λ y → ⊸r⋆seq Γ₁ (emb-p∙ (pass∙ {Γ = tag-isInter inTeq} f (sym (tagers-isInter inTeq)))) (subst
+       (λ x₁ → isInter x₁ (A' ∷ ys) (A' ∷ ersL (tag-isInter inTeq)))
+       (sym (sym (cong (_∷_ x) (tagErs xs)))) y) peq) (∷right-subst-lem2 (ersL-isInter (tag-lem' inTeq)) (blackErs ys))) ≗∙ (≡-to-≗ (cong (λ y → ⊸r⋆seq Γ₁ (emb-p∙ (pass∙ {Γ = tag-isInter inTeq} f (sym (tagers-isInter inTeq)))) y peq) (∷right-subst-lem1 (subst
+         (λ x₁ → isInter (x ∷ ersL (tagL xs)) x₁ (ersL (tag-isInter inTeq)))
+         (blackErs ys) (ersL-isInter (tag-lem' inTeq))) (sym (sym (cong (_∷_ x) (tagErs xs)))))) ≗∙ (lem' {Γ' = tag-isInter inTeq} Γ₁ f (subst (λ x₁ → isInter x₁ ys (ersL (tag-isInter inTeq)))
+        (sym (sym (cong (_∷_ x) (tagErs xs))))
+        (subst
+         (λ x₁ → isInter (x ∷ ersL (tagL xs)) x₁ (ersL (tag-isInter inTeq)))
+         (blackErs ys) (ersL-isInter (tag-lem' inTeq)))) peq (sym (tagers-isInter inTeq)) ≗∙ ≡-to-≗ (cong (λ y → ⊸r⋆seq Γ₁ (pass (emb-li f)) (∷right y) peq) (trans (cong₂ (λ y z → subst (isInter (x ∷ xs) ys)
+      y
+      (subst (λ x₁ → isInter x₁ ys (ersL (tag-isInter inTeq)))
+       z
+       (subst
+        (λ x₁ → isInter (x ∷ ersL (tagL xs)) x₁ (ersL (tag-isInter inTeq)))
+        (blackErs ys) (ersL-isInter (tag-lem' inTeq))))) (sym-sym (tagers-isInter inTeq)) (sym-sym (cong (_∷_ x) (tagErs xs)))) (sym (subst3-lem inTeq)))))))) refl
+    -- ⊗r (emb⊸r⋆-ri∙' Γ₁ (li2ri (p2li (pass∙ f (sym (tagers-isInter inTeq))))) (tag-lem' (∷right inTeq)) (∷right inTeq) peq (cong (A' ∷_) (sym (tagers-isInter inTeq))) (sym (tagErs (x ∷ xs))) refl ≗∙ cong⊸r⋆seq Γ₁ {inTeq = ∷right inTeq} {peq} (emb-p∙pass-lem Γ {Γ' = tag-isInter inTeq} f (sym (tagers-isInter inTeq)))) refl
+
+
+  emb⊗r-p Γ₁ (f2p f) g inTeq peq = {!   !} -- emb⊗r-f Γ₁ f g inTeq peq -- emb⊗r-f Γ₁ f g inTeq peq
+
+  emb⊗r-li : {S : Stp} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A : Pos} {B : Fma}
+      → (f : S ∣ Γ ⊢li A) (g : - ∣ Δ ⊢ri B) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁)
+      → emb-li (gen⊗r-li Γ₁ f g inTeq peq) ≗ ⊗r (⊸r⋆seq Γ₁ (emb-li f) inTeq peq) (emb-ri g)
+  emb⊗r-li Γ₁ (Il f) g inTeq peq = Il (emb⊗r-li Γ₁ f g inTeq peq) 
+    ≗∙ ((~ (⊗rIl)) 
+    ≗∙ (~ (⊗r (⊸r⋆seqIl Γ₁ {inTeq = inTeq} {peq}) refl)))
+  emb⊗r-li Γ₁ (⊗l (ex (ex {Γ = x ∷ Γ} f refl refl) eq' eq₁)) g inTeq peq = ⊥-elim ([]disj∷ Γ (proj₂ (inj∷ eq')))
+  emb⊗r-li Γ₁ (⊗l (ex {Δ = Δ} {Λ} (ri2c (li2ri f)) refl refl)) g inTeq peq with isInter++? Δ Λ refl inTeq
+  ... | Λ₀ , Λ₁ , Ψ₀ , Ψ₁ , inTeq1 , inTeq2 , refl , refl , refl = 
+    ⊗l (cong-ex-cxt-fma Λ₀ (emb⊗r-li Γ₁ f g (isInter++ inTeq1 (∷left' Ψ₁ inTeq2)) peq)) 
+    ≗∙ (⊗l (ex-cxt-fma-⊗r₁ [] Λ₀) ≗∙ (((~ ⊗r⊗l) 
+    ≗∙ ⊗r (⊗l (ex-cxt-fma-⊸r⋆seq Γ₁ Δ Λ {inTeq1 = inTeq1} {inTeq2} {peq})) refl) 
+    ≗∙ ⊗r (~ (⊸r⋆seq⊗l Γ₁ {inTeq = (isInter++ inTeq1 inTeq2)} {peq})) refl))
+  emb⊗r-li Γ₁ (p2li f) g inTeq peq = emb⊗r-p Γ₁ f g inTeq peq
 
 -- emb⊗r-ri : {S : Stp} {Γ Γ₀ Γ₁' : Cxt} (Γ₁ : Cxt) {Δ : Cxt} {A B : Fma}
 --     → (f : S ∣ Γ ⊢ri A) (g : - ∣ Δ ⊢ri B) (inTeq : isInter Γ₀ Γ₁' Γ) (peq : Γ₁' ↭' Γ₁)
@@ -660,4 +951,4 @@ mutual
 -- embfocus (⊗r f g) = emb⊗r-c (focus f) (focus g) ≗∙ ⊗r (embfocus f) (embfocus g)
 -- embfocus (⊸l f g) = emb⊸l-c (focus f) (focus g) ≗∙ ⊸l (embfocus f) (embfocus g)
 -- embfocus (⊸r f) = emb⊸r-c (focus f) refl ≗∙ ⊸r (embfocus f)
--- embfocus (ex f) = embex-c (focus f) refl ≗∙ ex (embfocus f)                                        
+-- embfocus (ex f) = embex-c (focus f) refl ≗∙ ex (embfocus f)                                                  
