@@ -96,37 +96,6 @@ Il-1 (ex f) = ex (Il-1 f)
 ⊸r-1 (⊸r f) = f
 ⊸r-1 {A = A} (ex {Γ = Γ} {Δ} f) = ex (⊸r-1 {Γ = Γ ++ _ ∷ _ ∷ Δ} f)
 
--- ⊸r⋆
-
-
--- isInter-split-r ys₀ ys₁ eq isInter[] with []++ {xs = ys₀} {ys₁} eq 
--- isInter-split-r .[] .[] refl isInter[] | refl , refl = [] , [] , [] , [] , isInter[] , isInter[] , refl , refl , refl
--- isInter-split-r [] (x ∷ ys₁) refl []left = [] , [] , [] , x ∷ ys₁ , isInter[] , []left , refl , refl , refl
--- isInter-split-r (x ∷ ys₀) [] refl []left = [] , [] , x ∷ ys₀ , [] , []left , isInter[] , refl , refl , refl
--- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl []left = [] , [] , x ∷ ys₀ , x₁ ∷ ys₁ , []left , []left , refl , refl , refl
--- isInter-split-r ys₀ ys₁ eq []right with []++ {xs = ys₀} {ys₁} eq 
--- isInter-split-r .[] .[] refl ([]right {x = x} {xs = xs}) | refl , refl = 
---   x ∷ xs , [] , x ∷ xs , [] , []right , isInter[] , refl , refl , refl
--- isInter-split-r [] (x ∷ ys₁) refl (∷left {x = x₁} {xs = xs} {zs = zs} inTeq) = 
---   [] , x₁ ∷ xs , [] , x₁ ∷ zs , isInter[] , ∷left inTeq , refl , refl , refl 
--- isInter-split-r (x ∷ ys₀) [] refl (∷left {x = x₁} {xs = xs} {zs = zs} inTeq) = 
---   x₁ ∷ xs , [] , x₁ ∷ zs , [] , ∷left inTeq , isInter[] , refl , refl , refl
--- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl (∷left {x = x₂} inTeq) with isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl inTeq
--- ... | xs₀ , xs₁ , zs₀ , zs₁ , inTeq1 , inTeq2 , refl , refl , refl = x₂ ∷ xs₀ , xs₁ , x₂ ∷ zs₀ , zs₁ , ∷left inTeq1 , inTeq2 , refl , refl , refl
--- isInter-split-r [] (x ∷ ys₁) refl (∷right {x = x₁} {xs = xs} {zs = zs} inTeq) = 
---   [] , x₁ ∷ xs , [] , x ∷ zs , isInter[] , ∷right inTeq , refl , refl , refl
--- isInter-split-r (x ∷ ys₀) [] refl (∷right {x = x₁} {xs = xs} {zs = zs} inTeq) = 
---   x₁ ∷ xs , [] , x ∷ zs , [] , ∷right inTeq , isInter[] , refl , refl , refl
--- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl (∷right inTeq) with isInter-split-r ys₀ (x₁ ∷ ys₁) refl inTeq
--- ... | [] , x₂ ∷ xs₁ , .[] , zs₁ , isInter[] , inTeq2 , refl , refl , refl = [] , x₂ ∷ xs₁ , x ∷ [] , zs₁ , []left , inTeq2 , refl , refl , refl
--- isInter-split-r (x ∷ .(_ ∷ xs)) (x₁ ∷ ys₁) refl (∷right .(isInter++ []left inTeq2)) | [] , x₂ ∷ xs₁ , .(_ ∷ xs) , zs₁ , []left {xs = xs} , inTeq2 , refl , refl , refl = [] , x₂ ∷ xs₁ , x ∷ _ ∷ xs , zs₁ , []left , inTeq2 , refl , refl , refl
--- isInter-split-r (x ∷ ys₀) (x₁ ∷ ys₁) refl (∷right .(isInter++ inTeq1 inTeq2)) | x₂ ∷ xs₀ , xs₁ , zs₀ , zs₁ , inTeq1 , inTeq2 , refl , refl , refl = x₂ ∷ xs₀ , xs₁ , x ∷ zs₀ , zs₁ , ∷right inTeq1 , inTeq2 , refl , refl , refl
-
-
-
-
-
-
 -- Cut Elimination
 
 scut : {S : Stp} {Γ Δ : Cxt} {A C : Fma} 
