@@ -11,8 +11,6 @@ open import Data.Sum
 open import Data.Empty
 open import Data.Product
 open import Relation.Binary.PropositionalEquality hiding (_≗_)
--- open import Data.List.Relation.Binary.Permutation.Propositional renaming (trans to transiff; swap to swapiff)
--- open import Data.List.Relation.Binary.Permutation.Propositional.Properties 
 open ≡-Reasoning
 open import Data.Bool renaming (Bool to Tag; true to ∙; false to ∘)
 
@@ -20,19 +18,16 @@ open import Formulae
 open import SeqCalc
 open import Utilities hiding (++?)
 open import IsInter
--- 
--- 
--- The focused sequent calculus of skew symmetric monoidal closed categories
 
 -- Tagged formulae
 TFma : Set
 TFma = (Tag × Fma)
 
-TFmaEQ : TFma → TFma → Tag
-TFmaEQ (∘ , A) (∘ , B) = fmaEQ A B
-TFmaEQ (∙ , A) (∙ , B) = fmaEQ A B
-TFmaEQ (∘ , A) (∙ , B) = ∘
-TFmaEQ (∙ , A) (∘ , B) = ∘
+-- TFmaEQ : TFma → TFma → Tag
+-- TFmaEQ (∘ , A) (∘ , B) = fmaEQ A B
+-- TFmaEQ (∙ , A) (∙ , B) = fmaEQ A B
+-- TFmaEQ (∘ , A) (∙ , B) = ∘
+-- TFmaEQ (∙ , A) (∘ , B) = ∘
 
 TFma? : (x : Tag) → Set
 TFma? ∘ = Fma
@@ -45,13 +40,13 @@ TCxt = List (Tag × Fma)
 TCxt? : Tag → Set
 TCxt? x = List (TFma? x)
 
-inTCxt : TFma → TCxt → Tag
-inTCxt A [] = ∘
-inTCxt A (B ∷ Γ) with TFmaEQ A B
-... | ∘ = inTCxt A Γ
-... | ∙ = ∙ 
+-- inTCxt : TFma → TCxt → Tag
+-- inTCxt A [] = ∘
+-- inTCxt A (B ∷ Γ) with TFmaEQ A B
+-- ... | ∘ = inTCxt A Γ
+-- ... | ∙ = ∙ 
 
--- White function for TFma and TCxt
+-- whiten TFma and TCxt
 whiteF : TFma → TFma
 whiteF (t , y) = (∘ , y)
 
@@ -65,7 +60,7 @@ white++ ((t , x) ∷ Γ) Δ = cong ((∘ , x) ∷_)  (white++ Γ Δ)
 
 {-# REWRITE white++ #-}
 
--- Tag adding function for Fma and Cxt
+-- add white tags to Fma and Cxt
 tagF : Fma → TFma
 tagF x = (∘ , x)
 
@@ -83,9 +78,11 @@ tagL++₁ : (Γ Δ : Cxt) → tagL (Γ ++ Δ) ≡ tagL Γ ++ tagL Δ
 tagL++₁ [] Δ = refl
 tagL++₁ (x ∷ Γ) Δ = cong ((∘ , x) ∷_) (tagL++₁ Γ Δ)
 
+whiteL? : (x : Tag) → TCxt? x → TCxt
+whiteL? ∘ Γ = tagL Γ
+whiteL? ∙ Γ = whiteL Γ
 
-
--- tag erasing
+-- erase tags
 ersF : TFma → Fma
 ersF A = proj₂ A
 
@@ -103,13 +100,7 @@ ersL? : (x : Tag) → TCxt? x → Cxt
 ersL? ∘ Γ = Γ
 ersL? ∙ Γ = ersL Γ
 
-whiteL? : (x : Tag) → TCxt? x → TCxt
-whiteL? ∘ Γ = tagL Γ
-whiteL? ∙ Γ = whiteL Γ
-
-whiteL₂ : Cxt → TCxt
-whiteL₂ [] = []
-whiteL₂ (x ∷ Γ) = (∘ , x) ∷ (whiteL₂ Γ)
+-- add black tags to Fma and Cxt
 
 black : Cxt → TCxt
 black [] = []
@@ -120,6 +111,8 @@ black++ [] Δ = refl
 black++ (x ∷ Γ) Δ = cong ((∙ , x) ∷_)  (black++ Γ Δ)
 
 {-# REWRITE black++ #-}
+
+-- equalities on tagging operations
 
 blackErs : (Γ : Cxt) → ersL (black Γ) ≡ Γ
 blackErs [] = refl
@@ -153,9 +146,9 @@ tagErsWhite : (Γ : TCxt) → tagL (ersL Γ) ≡ whiteL Γ
 tagErsWhite [] = refl
 tagErsWhite (A ∷ Γ) = cong ((∘ , proj₂ A) ∷_) (tagErsWhite Γ)
 {-# REWRITE tagErsWhite #-}
--- Sequents have 5 phases
 
--- c = context phase
+-- five phases in the focused sequent calculus
+
 data _∣_∣_؛_⊢c_ : (x : Tag) → Stp → TCxt? x → TCxt? x → Fma → Set
 
 -- ri = right invertible phase
@@ -260,10 +253,6 @@ data _∣_∣_⊢f_ where
        -----------------------------------------------------------
         ∙ ∣ (just (A ⊸ B) , _) ∣ Γ' ++ Δ ⊢f C
 
---======================================================
--- We could not have syntactic sugar for white sequent because
--- Agda doesn't know how eq transported by tagL.
-
 infix 15 _∣_∣_⊢ri_ _∣_∣_؛_⊢c_ _∣_∣_⊢li_ 
 -- We don't display the white phase
 _∣_؛_⊢c_ : Stp → Cxt → Cxt → Fma → Set
@@ -283,12 +272,12 @@ S ∣ Γ ⊢f C =  ∘ ∣ S ∣ Γ ⊢f C
 
 -- =======================================================
 
--- exchange rule in phase c
+-- exchange is admissible in phase c
 ex-c' : ∀{S} Φ {Ψ Γ Λ A B C} → S ∣ Λ ؛ Γ ⊢c C → Λ ≡ Φ ++ A ∷ B ∷ Ψ
   → S ∣ Φ ++ B ∷ A ∷ Ψ ؛ Γ ⊢c C 
 ex-c' Φ {Ψ} {A = A} {B} (ex {Γ = Φ'} {A = A'} f refl eq') eq with cases++ Φ' Φ [] (A ∷ B ∷ Ψ) (sym eq)
-... | inj₁ (Ψ₀ , p , q) = ⊥-elim ([]disj∷ Ψ₀ q) -- ex-c' formula is in the right context of exchanged formula A', which is impossible
-ex-c' Φ {.[]} {A = A} {B} (ex {Γ = .(Φ₁ ++ _ ∷ [])} {Γ} {Δ} {A = B} (ex {Γ = Φ₁} {Γ₁} {Δ₁} f refl refl) refl eq') eq | inj₂ (A ∷ [] , refl , q) with snoc≡ Φ₁ Φ q | cases++ Γ Γ₁ Δ Δ₁ eq' -- ex-c' formula is in the left context of exchanged formula A'
+... | inj₁ (Ψ₀ , p , q) = ⊥-elim ([]disj∷ Ψ₀ q)
+ex-c' Φ {.[]} {A = A} {B} (ex {Γ = .(Φ₁ ++ _ ∷ [])} {Γ} {Δ} {A = B} (ex {Γ = Φ₁} {Γ₁} {Δ₁} f refl refl) refl eq') eq | inj₂ (A ∷ [] , refl , q) with snoc≡ Φ₁ Φ q | cases++ Γ Γ₁ Δ Δ₁ eq' 
 ... | refl , refl | inj₁ (Γ₀ , refl , refl) = ex {Γ = Φ ++ B ∷ []} {Γ ++ Γ₀} (ex {Γ = Φ} {Γ} f refl refl) refl refl
 ... | refl , refl | inj₂ (Γ₀ , refl , refl) = ex {Γ = Φ ++ B ∷ []} {Γ₁} (ex {Γ = Φ}{Γ₁ ++ A ∷ Γ₀} f refl refl) refl refl
 ex-c' Φ {.[]} {A = A} {B} (ex {Γ = .[]} {A = .B} (ri2c f) refl eq') eq | inj₂ (A ∷ [] , refl , q) = ⊥-elim ([]disj∷ Φ q)
@@ -300,7 +289,7 @@ ex-c : ∀{S} Φ {Ψ Γ A B C} → S ∣ Φ ++ A ∷ B ∷ Ψ ؛ Γ ⊢c C
 ex-c Φ f = ex-c' Φ f refl
 
 
--- ⊸r rule in phase c
+-- ⊸r rule is admissible in phase c
 ⊸r-c' : {S : Stp} {Γ Λ Δ₀ Δ₁ : Cxt} {A : Fma} {B : Fma} → 
        (f : S ∣ Γ ؛ Λ ⊢c B) (eq : Λ ≡ Δ₀ ++ A ∷ Δ₁) → 
        -----------------------------------

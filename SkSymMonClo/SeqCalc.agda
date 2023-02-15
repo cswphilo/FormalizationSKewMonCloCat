@@ -311,7 +311,7 @@ IlIl-1 (ex f) = (~ exIl) ∙ ex (IlIl-1 f)
 ⊗l⊗l-1 ax = ~ ax⊗
 ⊗l⊗l-1 (⊗r f f₁) = (~ ⊗r⊗l) ∙ (⊗r (⊗l⊗l-1 f) refl)
 ⊗l⊗l-1 (⊗l f) = refl      
-⊗l⊗l-1 (⊸r f) = (~ ⊸r⊗l) ∙ ⊸r (⊗l⊗l-1 f)     -- ~ ⊸r⊗l
+⊗l⊗l-1 (⊸r f) = (~ ⊸r⊗l) ∙ ⊸r (⊗l⊗l-1 f)   
 ⊗l⊗l-1 (ex f) = (~ ex⊗l) ∙ ex (⊗l⊗l-1 f)
 
 -- ====================================================================
@@ -649,13 +649,3 @@ ex-fma-cxt-ex-cxt-fma : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁
       ≗ ex-cxt-fma {Γ = Γ₁} Λ (ex-fma-cxt {Γ = Γ₁ ++ Λ ++ A ∷ Γ₂} Λ' f)
 ex-fma-cxt-ex-cxt-fma [] Λ' = refl
 ex-fma-cxt-ex-cxt-fma {Γ₁ = Γ₁} {Γ₂} (x ∷ Λ) Λ' = ex-fma-cxt-ex Λ' ∙ ex (ex-fma-cxt-ex-cxt-fma {Γ₁ = Γ₁ ++ x ∷ []} Λ Λ')
-
--- ex-fma-cxt-ex-cxt-fma' : ∀{S Γ₁ Γ₂ Γ₃} Λ Λ' {A A' C}{f : S ∣ Γ₁ ++ Λ ++ A ∷ Γ₂ ++ A' ∷ Λ' ++ Γ₃ ⊢ C}
---   → ex-fma-cxt {Γ = Γ₁ ++ A' ∷ Λ} {Δ = Γ₃} (Γ₂ ++ Λ') (ex-cxt-fma {Γ = Γ₁} {Δ = Λ' ++ Γ₃} (Λ ++ A ∷ Γ₂) f) 
---     ≗ ex-cxt-fma {Γ = Γ₁} {Δ = Λ' ++ A ∷ Γ₃} (Λ ++ Γ₂) (ex-fma-cxt {Γ = Γ₁ ++ Λ} {Δ = Γ₃} (Γ₂ ++ A' ∷ Λ') f)
--- ex-fma-cxt-ex-cxt-fma' {Γ₁ = Γ₁} {Γ₂ = Γ₂} {Γ₃} [] Λ' {A} {A'} {f = f} = 
---   ≡-to-≗ (ex-fma-cxt++ {Γ = Γ₁ ++ A' ∷ []} Γ₂ Λ' (ex (ex-cxt-fma {Γ = Γ₁ ++ A ∷ []} Γ₂ f))) 
---   ∙ ((cong-ex-fma-cxt Λ' (ex-cxt-fma-ex-fma-cxt-braid Γ₂) ∙ ex-fma-cxt-ex-cxt-fma Γ₂ Λ') 
---   ∙ cong-ex-cxt-fma Γ₂ (~ (≡-to-≗ (ex-fma-cxt++ Γ₂ (A' ∷ Λ') f))))
--- ex-fma-cxt-ex-cxt-fma' (x ∷ Λ) Λ' = {!   !}
-

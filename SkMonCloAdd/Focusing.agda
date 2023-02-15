@@ -15,24 +15,12 @@ open import Data.Bool hiding (_∧_; _∨_)
 open import Utilities
 open import Formulae 
 
+
 data Tag : Set where
   E : Tag
   L : Tag
   R : Tag
 
-
--- Tagged context 
--- TCxt : List Tag → Set
--- TCxt [] = {!   !}
--- TCxt (x ∷ T₁) = {!   !}
-
--- tcxt : (x : Tag) → TCxt x → Cxt
--- tcxt ∘ Ω = []
--- tcxt ∙ Ω = Ω
-
--- T[] : (x : Tag) → TCxt x
--- T[] ∘ = tt
--- T[] ∙ = []
 
 -- {- ====================================================== -}
 -- -- Inference rules of focused seqent calculus
@@ -183,26 +171,6 @@ data _∣_∣_؛_⊢fT_ where
              [ R ] ∣ (just (A ∧ B) , _) ∣ Γ ؛ Ω ⊢fT C
 
 
--- data _؛_⇒_ : List (Cxt × Pos) → List (Cxt × Fma) → Fma → Set where 
---   stop' : {Φ : List (Cxt × Pos)}{A : Fma} → Φ ؛ [] ⇒ A
---   conj' : {Φ : List (Cxt × Pos)} {Ψ₀ Ψ₁ : List (Cxt × Fma)} {Γ' : Cxt} {A A' B' : Fma} 
---     → Φ ؛ Ψ₀ ++ (Γ' , A') ∷ (Γ' , B') ∷ Ψ₁ ⇒ A
---     → Φ ؛ Ψ₀ ++ (Γ' , A' ∧ B') ∷ Ψ₁ ⇒ A
---   impl' : {Φ : List (Cxt × Pos)} {Ψ₀ Ψ₁ : List (Cxt × Fma)} {Γ' : Cxt} {A A' B' : Fma}
---     → Φ ؛ Ψ₀ ++ (Γ' ++ A' ∷ [] , B') ∷ Ψ₁ ⇒ A
---     → Φ ؛ Ψ₀ ++ (Γ' , A' ⊸ B') ∷ Ψ₁ ⇒ A
-
--- -- Big Step Rule BSR
-
--- BSR : {S : Stp} {Γ Γ' Γ'' : Cxt} {A A' : Fma} {Φ : List (Cxt × Pos)} {Ψ₀ Ψ₁ : List (Cxt × Fma)}
---   → (f : S ∣ Γ'' ⊢ri A') (RS : Φ ؛ Ψ₀ ++ (Γ' , A') ∷ Ψ₁ ⇒ A)
---   → (eq : Γ'' ≡ Γ ++ Γ')
---   ---------------------------------------------------------------
---   → S ∣ Γ ⊢ri A
--- BSR (⊸r f) RS refl = {! RS  !}
--- BSR (∧r f f₁) RS eq = {!   !}
--- BSR {Ψ₀ = []} (li2ri f) RS eq = {!   !}
--- BSR {Ψ₀ = x ∷ Ψ₀} (li2ri f) RS eq = {!   !}
 data Relation : List (Cxt × Fma) → Fma → Set where
   conj : {Φ Ψ : List (Cxt × Fma)} {A B : Fma} → 
       Relation Φ A → Relation Ψ B → 
@@ -332,70 +300,70 @@ gen∨r₁-li Γ' {Θ = Θ} RS (p2li (f2p f)) refl FS =
 --     lem = gen∨r₁ ((((Γ' ++ _ ∷ []) , _ ) , Δ' ++ _ ∷ []) ∷ Θ) (Realation⊸r RS refl) ((cong (λ x → x ++ _ ∷ []) {y = Γ ++ Γ'} eq , f) ∷ Fs)
 -- gen∨r₁ (((Γ' , .(_ ∧ _)) , Δ') ∷ Θ) RS ((eq , ∧r f f₁) ∷ Fs) = {!   !}
 -- gen∨r₁ (((Γ' , .(pos _)) , Δ') ∷ Θ) RS ((eq , li2ri f) ∷ Fs) = {!   !}
--- admissible rules
-Il-ri : {Γ : Cxt} {C : Fma}
-        (f : - ∣ Γ ⊢ri C) →
-    ------------------------
-        just I ∣ Γ ⊢ri C 
+-- -- admissible rules
+-- Il-ri : {Γ : Cxt} {C : Fma}
+--         (f : - ∣ Γ ⊢ri C) →
+--     ------------------------
+--         just I ∣ Γ ⊢ri C 
 
-Il-ri (⊸r f) = ⊸r (Il-ri f)
-Il-ri (∧r f f₁) = ∧r (Il-ri f) (Il-ri f₁)
-Il-ri (li2ri f) = li2ri (Il f)
+-- Il-ri (⊸r f) = ⊸r (Il-ri f)
+-- Il-ri (∧r f f₁) = ∧r (Il-ri f) (Il-ri f₁)
+-- Il-ri (li2ri f) = li2ri (Il f)
 
-⊗l-ri : {Γ : Cxt} {A B C : Fma}
-        (f : just A ∣ B ∷ Γ ⊢ri C) →
-      --------------------------------
-           just (A ⊗ B) ∣ Γ ⊢ri C 
+-- ⊗l-ri : {Γ : Cxt} {A B C : Fma}
+--         (f : just A ∣ B ∷ Γ ⊢ri C) →
+--       --------------------------------
+--            just (A ⊗ B) ∣ Γ ⊢ri C 
 
-⊗l-ri (⊸r f) = ⊸r (⊗l-ri f)
-⊗l-ri (∧r f f₁) = ∧r (⊗l-ri f) (⊗l-ri f₁)
-⊗l-ri (li2ri f) = li2ri (⊗l f)
+-- ⊗l-ri (⊸r f) = ⊸r (⊗l-ri f)
+-- ⊗l-ri (∧r f f₁) = ∧r (⊗l-ri f) (⊗l-ri f₁)
+-- ⊗l-ri (li2ri f) = li2ri (⊗l f)
 
-∨l-ri : {Γ : Cxt} {A B C : Fma} 
-        (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C) → 
-            just (A ∨ B) ∣ Γ ⊢ri C
-∨l-ri (⊸r f) (⊸r g) = ⊸r (∨l-ri f g)
-∨l-ri (∧r f f₁) (∧r g g₁) = ∧r (∨l-ri f g) (∨l-ri f₁ g₁)
-∨l-ri (li2ri f) (li2ri f₁) = li2ri (∨l f f₁) 
+-- ∨l-ri : {Γ : Cxt} {A B C : Fma} 
+--         (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C) → 
+--             just (A ∨ B) ∣ Γ ⊢ri C
+-- ∨l-ri (⊸r f) (⊸r g) = ⊸r (∨l-ri f g)
+-- ∨l-ri (∧r f f₁) (∧r g g₁) = ∧r (∨l-ri f g) (∨l-ri f₁ g₁)
+-- ∨l-ri (li2ri f) (li2ri f₁) = li2ri (∨l f f₁) 
 
-pass-ri : {Γ : Cxt} {A C : Fma}
-          (f : just A ∣ Γ ⊢ri C) →
-     --------------------------------
-              - ∣ A ∷ Γ ⊢ri C 
+-- pass-ri : {Γ : Cxt} {A C : Fma}
+--           (f : just A ∣ Γ ⊢ri C) →
+--      --------------------------------
+--               - ∣ A ∷ Γ ⊢ri C 
 
-pass-ri (⊸r f) = ⊸r (pass-ri f)
-pass-ri (∧r f f₁) = ∧r (pass-ri f) (pass-ri f₁)
-pass-ri (li2ri f) = li2ri (p2li (pass f))
+-- pass-ri (⊸r f) = ⊸r (pass-ri f)
+-- pass-ri (∧r f f₁) = ∧r (pass-ri f) (pass-ri f₁)
+-- pass-ri (li2ri f) = li2ri (p2li (pass f))
 
-Ir-ri : - ∣ [] ⊢ri I
-Ir-ri = li2ri (p2li (f2p Ir))
+-- Ir-ri : - ∣ [] ⊢ri I
+-- Ir-ri = li2ri (p2li (f2p Ir))
 
-⊸l-ri : {Γ Δ : Cxt} {A B C : Fma} 
-        (f : - ∣ Γ ⊢ri A) (g : just B ∣ Δ ⊢ri C) →
-      ---------------------------------------------
-         just (A ⊸ B) ∣ Γ ++ Δ ⊢ri C
+-- ⊸l-ri : {Γ Δ : Cxt} {A B C : Fma} 
+--         (f : - ∣ Γ ⊢ri A) (g : just B ∣ Δ ⊢ri C) →
+--       ---------------------------------------------
+--          just (A ⊸ B) ∣ Γ ++ Δ ⊢ri C
 
-⊸l-ri f (⊸r g) = ⊸r (⊸l-ri f g)
-⊸l-ri f (∧r g g₁) = ∧r (⊸l-ri f g) (⊸l-ri f g₁)
-⊸l-ri f (li2ri g) = li2ri (p2li (f2p (⊸l f g)))
+-- ⊸l-ri f (⊸r g) = ⊸r (⊸l-ri f g)
+-- ⊸l-ri f (∧r g g₁) = ∧r (⊸l-ri f g) (⊸l-ri f g₁)
+-- ⊸l-ri f (li2ri g) = li2ri (p2li (f2p (⊸l f g)))
 
-∧l₁-ri : {Γ : Cxt} {A B C : Fma}
-         (f : just A ∣ Γ ⊢ri C) → 
-              just (A ∧ B) ∣ Γ ⊢ri C
-∧l₁-ri (⊸r f) = ⊸r (∧l₁-ri f)
-∧l₁-ri (∧r f f₁) = ∧r (∧l₁-ri f) (∧l₁-ri f₁)
-∧l₁-ri (li2ri f) = li2ri (p2li (f2p (∧l₁ f)))
+-- ∧l₁-ri : {Γ : Cxt} {A B C : Fma}
+--          (f : just A ∣ Γ ⊢ri C) → 
+--               just (A ∧ B) ∣ Γ ⊢ri C
+-- ∧l₁-ri (⊸r f) = ⊸r (∧l₁-ri f)
+-- ∧l₁-ri (∧r f f₁) = ∧r (∧l₁-ri f) (∧l₁-ri f₁)
+-- ∧l₁-ri (li2ri f) = li2ri (p2li (f2p (∧l₁ f)))
 
-∧l₂-ri : {Γ : Cxt} {A B C : Fma}
-         (f : just B ∣ Γ ⊢ri C) → 
-              just (A ∧ B) ∣ Γ ⊢ri C
-∧l₂-ri (⊸r f) = ⊸r (∧l₂-ri f)
-∧l₂-ri (∧r f f₁) = ∧r (∧l₂-ri f) (∧l₂-ri f₁)
-∧l₂-ri (li2ri f) = li2ri (p2li (f2p (∧l₂ f)))
+-- ∧l₂-ri : {Γ : Cxt} {A B C : Fma}
+--          (f : just B ∣ Γ ⊢ri C) → 
+--               just (A ∧ B) ∣ Γ ⊢ri C
+-- ∧l₂-ri (⊸r f) = ⊸r (∧l₂-ri f)
+-- ∧l₂-ri (∧r f f₁) = ∧r (∧l₂-ri f) (∧l₂-ri f₁)
+-- ∧l₂-ri (li2ri f) = li2ri (p2li (f2p (∧l₂ f)))
 
--- ⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
---          (f : S ∣ Γ ⊢ri A) (g : - ∣ Δ ⊢ri B) → 
---                S ∣ Γ ++ Δ ⊢ri A ⊗ B
+-- -- ⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
+-- --          (f : S ∣ Γ ⊢ri A) (g : - ∣ Δ ⊢ri B) → 
+-- --                S ∣ Γ ++ Δ ⊢ri A ⊗ B
 
 
    
