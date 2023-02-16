@@ -16,113 +16,19 @@ open import Data.Bool hiding (_∧_; _∨_)
 
 open import Utilities
 open import Formulae1 
--- Seq-p : Set
--- Seq-p = Irr × Cxt × Pos
--- Seq-ri : Set
--- Seq-ri = Irr × Cxt × Fma
--- data hyper-ri : Irr → Cxt → List Pos → List Fma → Set
--- data hyper-p : Irr → Cxt → List Pos → List Pos → Set
--- -- data hyper-p-conj :  
+open import SeqCalc1
 
--- data _∣_⊢ri_ : Stp → Cxt → Fma → Set
-
-
--- -- l = left phase 
--- data _∣_⊢li_ : Stp → Cxt → Pos → Set
-
--- -- p = passviation
--- data _∣_⊢p_ : Irr → Cxt → Pos → Set
-
--- -- f = focusing
--- data _∣_⊢f_ : Irr → Cxt → Pos → Set
-
--- data _∣_⊢ri_ where
---   ∧r : {S : Stp} {Γ : Cxt} {A B : Fma}
---     → (f : S ∣ Γ ⊢ri A) (g : S ∣ Γ ⊢ri B)
---     ---------------------------------------
---     →          S ∣ Γ ⊢ri A ∧ B
---   li2ri : {S : Stp} {Γ : Cxt} {C : Pos}
---     → (f : S ∣ Γ ⊢li C)
---     ------------------------
---     →      S ∣ Γ ⊢ri pos C
-
--- data hyper-ri where
---   ∧r : {S : Irr} {Γ : Cxt} {A B : Fma}
---    {Θp : List Pos} {Θri : List Fma}
---    → hyper-ri S Γ Θp (A ∷ B ∷ Θri) 
---    → hyper-ri S Γ Θp (A ∧ B ∷ Θri)
---   p2riT : {S : Irr} {Γ : Cxt} {P : Pos}
---    {Θp : List Pos} {Θri : List Fma}
---    → hyper-ri S Γ (Θp ++ P ∷ []) Θri
---    → hyper-ri S Γ Θp ((pos P) ∷ Θri)
---   hp2ri : {S : Irr} {Γ : Cxt} {Θp : List Pos} 
---    → hyper-p S Γ [] Θp
---    → hyper-ri S Γ Θp []
-  
--- data hyper-p where
---   pass : {A : Fma} {Γ : Cxt} {P : Pos}
---    {Θli : List Pos} {Θp : List Pos}
---    → hyper-p (- , _) (A ∷ Γ) (Θli ++ P ∷ []) Θp
---    → hyper-p (- , _) (A ∷ Γ) Θli (P ∷ Θp)
---   f2p-emp : {A : Fma} {Γ : Cxt} {P : Pos}
---    {Θli : List Pos} {Θp : List Pos}
---    → All (λ P' → just A ∣ Γ ⊢li P') Θli 
---    → (- , _) ∣ A ∷ Γ ⊢f P 
---    → All (λ P' → (- , _) ∣ A ∷ Γ ⊢p P') Θp
---    → hyper-p (- , _) (A ∷ Γ) Θli (P ∷ Θp)
--- data _∣_⊢li_ where
---   ⊗l : {Γ : Cxt} {A B : Fma} {C : Pos}
---        (f : just A ∣ B ∷ Γ ⊢li C) →
---     -------------------------------------
---           just (A ⊗ B) ∣ Γ ⊢li C
---   Il : {Γ : Cxt} {C : Pos}
---        (f : - ∣ Γ ⊢li C) →
---     -------------------------
---             just I ∣ Γ ⊢li C 
---   p2li : {S : Irr} {Γ : Cxt} {C : Pos}
---         (f : S ∣ Γ ⊢p C) →
---         --------------------------
---              irr S ∣ Γ ⊢li C 
-
--- data _∣_⊢p_ where
---   pass : {Γ : Cxt} {A : Fma} {C : Pos}
---          (f : just A ∣ Γ ⊢li C) → 
---          --------------------------------
---               (- , _) ∣ A ∷ Γ ⊢p C
---   f2p : {S : Irr} {Γ : Cxt} {C : Pos}
---           (f : S ∣ Γ ⊢f C) → 
---           ----------------------------
---                S ∣ Γ ⊢p C
-
--- data _∣_⊢f_ where
---   ax : {X : At} → 
---        (just (` X) , _) ∣ [] ⊢f (` X , _)
---   Ir : (- , _) ∣ [] ⊢f (I , _)
---   ⊗r : {S : Irr} {Γ Δ : Cxt} {A B : Fma} → 
---          (f : hyper-ri S Γ [] (A ∷ [])) (g : - ∣ Δ  ⊢ri B) → 
---          -----------------------------------
---               S ∣ Γ ++ Δ ⊢f (A ⊗ B , _)
---   ∧l₁ : {Γ : Cxt} {A B : Fma} {C : Pos}
---         (f : just A ∣ Γ ⊢li C) → 
---         --------------------------------
---              (just (A ∧ B) , _) ∣ Γ ⊢f C
---   ∧l₂ : {Γ : Cxt} {A B : Fma} {C : Pos}
---         (f : just B ∣ Γ ⊢li C) → 
---         --------------------------------
---              (just (A ∧ B) , _) ∣ Γ ⊢f C
+mapList++ : {A B : Set} {f : A → B} (xs ys : List A) 
+  → mapList f (xs ++ ys) ≡ mapList f xs ++ mapList f ys
+mapList++ [] ys = refl
+mapList++ {f = f} (x ∷ xs) ys = cong (f x ∷_) (mapList++ xs ys)
+{-# REWRITE mapList++ #-}
 
 data Tag : Set where
   E : Tag
   L : Tag
   R : Tag
   P : Tag
---   NP : Tag
-
-
--- -- {- ====================================================== -}
--- -- -- Inference rules of focused seqent calculus
-
--- -- -- Sequents have 4 phases:
 
 isOKL : List Tag → Set
 isOKL (R ∷ l) = ⊤
@@ -182,6 +88,7 @@ data _∣_∣_⊢riT_ where
     → (f : t ∣ S ∣ Γ ⊢pT C)
     ------------------------
     →    [ t ] ∣ S ∣ Γ ⊢riT pos C
+
 data _∣_⊢li_ where
   ⊗l : {Γ : Cxt} {A B : Fma} {C : Pos}
        (f : just A ∣ B ∷ Γ ⊢li C) →
@@ -194,7 +101,8 @@ data _∣_⊢li_ where
   p2li : {S : Irr} {Γ : Cxt} {C : Pos}
         (f : S ∣ Γ ⊢p C) →
         --------------------------
-             irr S ∣ Γ ⊢li C 
+             irr S ∣ Γ ⊢li C
+              
 data _∣_⊢p_ where
   pass : {Γ : Cxt} {A : Fma} {C : Pos}
          (f : just A ∣ Γ ⊢li C) → 
@@ -204,6 +112,7 @@ data _∣_⊢p_ where
           (f : S ∣ Γ ⊢f C) → 
           ----------------------------
                S ∣ Γ ⊢p C
+
 data _∣_∣_⊢pT_ where
   passT : {Ω : Cxt} {A : Fma} {C : Pos}
            (f : just A ∣ Ω ⊢li C) → 
@@ -212,9 +121,7 @@ data _∣_∣_⊢pT_ where
   f2pT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
            (f : t ∣ S ∣ Γ ⊢fT C) → 
                 t ∣ S ∣ Γ ⊢pT C
---   f2pT1 : {S : Irr} {Γ : Cxt} {C : Pos}
---            (f : S ∣ Γ ⊢f C) → 
---            NP ∣ S ∣ Γ ⊢pT C
+
 data _∣_⊢f_ where
   ax : {X : At} → 
        (just (` X) , _) ∣ [] ⊢f (` X , _)
@@ -232,6 +139,7 @@ data _∣_⊢f_ where
         (f : just B ∣ Γ ⊢li C) → 
         --------------------------------
              (just (A ∧ B) , _) ∣ Γ ⊢f C
+
 data _∣_∣_⊢fT_ where 
   ax : {X : At} → 
        E ∣ (just (` X) , _) ∣ [] ⊢fT (` X , _)
@@ -272,11 +180,17 @@ data SubFmas : List Fma → Fma → Set where
   stop : {A : Fma} → 
        SubFmas [ A ]  A
 
-mapList++ : {A B : Set} {f : A → B} (xs ys : List A) 
-  → mapList f (xs ++ ys) ≡ mapList f xs ++ mapList f ys
-mapList++ [] ys = refl
-mapList++ {f = f} (x ∷ xs) ys = cong (f x ∷_) (mapList++ xs ys)
-{-# REWRITE mapList++ #-}
+SubFmas∧ : {Φ Ψ : List Fma} {Γ : List Fma} {A' B' A : Fma}
+    → SubFmas Γ A → (eq : Γ ≡ (Φ ++ A' ∧ B' ∷ Ψ))
+    → SubFmas (Φ ++ A' ∷ B' ∷ Ψ) A
+SubFmas∧ {Φ'} {Ψ'} (conj {Φ} {Ψ} {A' = A'} {B' = B'} SF SF₁) eq with cases++ Φ' (A' ∷ Φ) Ψ' (B' ∷ Ψ) eq
+SubFmas∧ {[]} {.(Δ ++ B' ∷ Ψ)} (conj {Δ} {Ψ} {A' = A'} {B' = B'} SF SF₁) refl | inj₁ (Δ , refl , refl) = conj {Φ = _ ∷ Δ} (SubFmas∧ {Φ = []} SF refl) SF₁
+SubFmas∧ {x ∷ Φ'} {.(Δ ++ B' ∷ Ψ)} {A' = A'} (conj {.(Φ' ++ A' ∧ _ ∷ Δ)} {Ψ} {A' = _} {B' = B'} SF SF₁) refl | inj₁ (Δ , refl , refl) = conj {Φ = Φ' ++ A' ∷ _ ∷ Δ} (SubFmas∧ {Φ = x ∷ Φ'} SF refl) SF₁
+SubFmas∧ {.(_ ∷ Φ ++ [])} {Ψ'} (conj {Φ} {.Ψ'} {A' = _} {B' = .(_ ∧ _)} SF SF₁) refl | inj₂ ([] , refl , refl) = conj SF (SubFmas∧ {Φ = []} SF₁ refl)
+SubFmas∧ {.(_ ∷ Φ ++ x ∷ Δ)} {Ψ'} (conj {Φ} {.(Δ ++ _ ∧ _ ∷ Ψ')} {A' = _} {B' = .x} SF SF₁) refl | inj₂ (x ∷ Δ , refl , refl) = conj SF (SubFmas∧ {Φ = x ∷ Δ} SF₁ refl)
+SubFmas∧ {[]} {[]} stop refl = conj stop stop
+SubFmas∧ {x ∷ Φ} {[]} stop eq = ⊥-elim ([]disj∷ Φ (proj₂ (inj∷ eq)))
+SubFmas∧ {x ∷ Φ} {x₁ ∷ Ψ} stop eq = ⊥-elim ([]disj∷ Φ (proj₂ (inj∷ eq)))
 
 
 -- A lemma helps to prove ∧rT*
@@ -556,8 +470,6 @@ check-focus (C , p2li (f2p (∧l₂ f))) (f' ∷ fs) | inj₂ ((.E , .(A ⊗ B ,
 ... | inj₂ ((.R , C' , f2pT (∧l₂T f₁)) ∷ fs' , eq , ok) = 
   inj₂ (((R , (C , (f2pT (∧l₂T f)))) ∷ (R , C' , f2pT (∧l₂T f₁)) ∷ fs') , (cong ((C , p2li (f2p (∧l₂ f))) ∷_) eq , ok))
 
-
-
 gen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
   → (f : S ∣ Γ ⊢li C)
   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
@@ -610,4 +522,129 @@ gen⊗r-li {C = C} (p2li (f2p (∧l₂ f))) fs RS g | inj₁ (inj₂ (inj₁ (A 
 gen⊗r-li {C = C} (p2li (f2p (∧l₂ f))) fs RS g | inj₂ ((.E , .(_ ⊗ _ , tt) , f2pT (⊗rT l ok₁ refl f₁ g₁)) ∷ fs' , () , ok)
 gen⊗r-li {C = .C'} (p2li (f2p (∧l₂ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') RS g | inj₂ ((.R , C' , f2pT (∧l₂T .f)) ∷ fs' , refl , ok) = 
   p2li (f2p (⊗r (R ∷ (mapList proj₁ fs')) ok refl (∧rT* RS ((R , C' , f2pT (∧l₂T f)) ∷ fs') (cong (pos C' ∷_) (sym (map-compose fs'))) refl) g))
-   
+
+f2fs : {S : Stp} {Γ : Cxt} {A : Fma}
+  → (f : S ∣ Γ ⊢ri A)
+  → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs → SubFmas (mapList (λ x → pos (proj₁ x)) fs) A)
+f2fs {A = ` x} (li2ri f) = (((` x , tt) , f) ∷ []) , stop
+f2fs {A = I} (li2ri f) = (((I , tt) , f) ∷ []) , stop
+f2fs {A = A ⊗ B} (li2ri f) = (((A ⊗ B , tt) , f) ∷ []) , stop
+f2fs {A = A ∧ B} (∧r f g) with f2fs f | f2fs g 
+... | f₁ ∷ fs , RS1 | g₁ ∷ gs , RS2 = (f₁ ∷ fs ++ g₁ ∷ gs) , (conj RS1 RS2)
+
+⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
+  → (f : S ∣ Γ ⊢ri A)
+  → (g : - ∣ Δ ⊢ri B)
+  → S ∣ Γ ++ Δ ⊢ri A ⊗ B
+⊗r-ri {A = A} f g with f2fs f
+... | (C , f₁) ∷ fs , RS = li2ri (gen⊗r-li f₁ fs RS g)
+
+-- admissible rules, except ⊗r-ri
+Il-ri : {Γ : Cxt} {C : Fma}
+        (f : - ∣ Γ ⊢ri C) →
+    ------------------------
+        just I ∣ Γ ⊢ri C 
+Il-ri (∧r f f₁) = ∧r (Il-ri f) (Il-ri f₁)
+Il-ri (li2ri f) = li2ri (Il f)
+
+⊗l-ri : {Γ : Cxt} {A B C : Fma}
+        (f : just A ∣ B ∷ Γ ⊢ri C) →
+      --------------------------------
+           just (A ⊗ B) ∣ Γ ⊢ri C 
+⊗l-ri (∧r f f₁) = ∧r (⊗l-ri f) (⊗l-ri f₁)
+⊗l-ri (li2ri f) = li2ri (⊗l f)
+
+pass-ri : {Γ : Cxt} {A C : Fma}
+          (f : just A ∣ Γ ⊢ri C) →
+     --------------------------------
+              - ∣ A ∷ Γ ⊢ri C 
+pass-ri (∧r f f₁) = ∧r (pass-ri f) (pass-ri f₁)
+pass-ri (li2ri f) = li2ri (p2li (pass f))
+
+∧l₁-ri : {Γ : Cxt} {A B C : Fma}
+         (f : just A ∣ Γ ⊢ri C) → 
+              just (A ∧ B) ∣ Γ ⊢ri C
+∧l₁-ri (∧r f f₁) = ∧r (∧l₁-ri f) (∧l₁-ri f₁)
+∧l₁-ri (li2ri f) = li2ri (p2li (f2p (∧l₁ f)))
+
+∧l₂-ri : {Γ : Cxt} {A B C : Fma}
+         (f : just B ∣ Γ ⊢ri C) → 
+              just (A ∧ B) ∣ Γ ⊢ri C
+∧l₂-ri (∧r f f₁) = ∧r (∧l₂-ri f) (∧l₂-ri f₁)
+∧l₂-ri (li2ri f) = li2ri (p2li (f2p (∧l₂ f)))
+
+Ir-ri : - ∣ [] ⊢ri I
+Ir-ri = li2ri (p2li (f2p Ir))
+
+ax-ri : {C : Fma} → just C ∣ [] ⊢ri C
+ax-ri {C = ` x} = li2ri (p2li (f2p ax))
+ax-ri {C = I} = li2ri (Il (p2li (f2p Ir)))
+ax-ri {C = C ⊗ C₁} = ⊗l-ri (⊗r-ri ax-ri (pass-ri ax-ri))
+ax-ri {C = C ∧ C₁} = ∧r (∧l₁-ri ax-ri) (∧l₂-ri ax-ri)
+
+-- focus function maps each derivation in SeqCalc to a focused derivation.
+
+focus : {S : Stp} {Γ : Cxt} {C : Fma}
+  → (f : S ∣ Γ ⊢ C)
+  → S ∣ Γ ⊢ri C
+focus ax = ax-ri
+focus (pass f) = pass-ri (focus f)
+focus Ir = Ir-ri
+focus (Il f) = Il-ri (focus f)
+focus (⊗r f f₁) = ⊗r-ri (focus f) (focus f₁)
+focus (⊗l f) = ⊗l-ri (focus f)
+focus (∧r f f₁) = ∧r (focus f) (focus f₁)
+focus (∧l₁ f) = ∧l₁-ri (focus f)
+focus (∧l₂ f) = ∧l₂-ri (focus f)
+
+-- each emb function maps derivations in the certain phase to a non-focused derivation
+
+mutual
+  emb-ri : {S : Stp} {Γ : Cxt} {C : Fma}
+    → (f : S ∣ Γ ⊢ri C)
+    → S ∣ Γ ⊢ C
+  emb-ri (∧r f f₁) = ∧r (emb-ri f) (emb-ri f₁)
+  emb-ri (li2ri f) = emb-li f
+
+  emb-riT : {l : List Tag} {S : Irr} {Γ : Cxt} {C : Fma}
+    → (f : l ∣ S ∣ Γ ⊢riT C)
+    → irr S ∣ Γ ⊢ C
+  emb-riT (∧rT f f₁) = ∧r (emb-riT f) (emb-riT f₁)
+  emb-riT (p2riT f) = emb-pT f
+
+  emb-li : {S : Stp} {Γ : Cxt} {C : Pos}
+    → (f : S ∣ Γ ⊢li C)
+    → S ∣ Γ ⊢ pos C
+  emb-li (⊗l f) = ⊗l (emb-li f)
+  emb-li (Il f) = Il (emb-li f)
+  emb-li (p2li f) = emb-p f
+
+  emb-p : {S : Irr} {Γ : Cxt} {C : Pos}
+    → (f : S ∣ Γ ⊢p C)
+    → irr S ∣ Γ ⊢ pos C
+  emb-p (pass f) = pass (emb-li f)
+  emb-p (f2p f) = emb-f f
+
+  emb-pT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
+    → (f : t ∣ S ∣ Γ ⊢pT C)
+    → irr S ∣ Γ ⊢ pos C
+  emb-pT (passT f) = pass (emb-li f)
+  emb-pT (f2pT f) = emb-fT f
+
+  emb-f : {S : Irr} {Γ : Cxt} {C : Pos}
+    → (f : S ∣ Γ ⊢f C)
+    → irr S ∣ Γ ⊢ pos C
+  emb-f ax = ax
+  emb-f Ir = Ir
+  emb-f (⊗r l ok refl f g) = ⊗r (emb-riT f) (emb-ri g)
+  emb-f (∧l₁ f) = ∧l₁ (emb-li f)
+  emb-f (∧l₂ f) = ∧l₂ (emb-li f)
+
+  emb-fT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
+    → (f : t ∣ S ∣ Γ ⊢fT C)
+    → irr S ∣ Γ ⊢ pos C
+  emb-fT ax = ax
+  emb-fT Ir = Ir
+  emb-fT (⊗rT l ok refl f g) = ⊗r (emb-riT f) (emb-ri g)
+  emb-fT (∧l₁T f) = ∧l₁ (emb-li f)
+  emb-fT (∧l₂T f) = ∧l₂ (emb-li f)
