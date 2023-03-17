@@ -78,3 +78,30 @@ data _≗_ : {S  : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A
   ⊗r⊗l : {Γ Δ : Cxt} {A A' B B' : Fma}
     → {f : just A' ∣ B' ∷ Γ ⊢ A} {g : - ∣ Δ ⊢ B}
     → ⊗r (⊗l f) g ≗ ⊗l (⊗r f g)
+  ⊗r∧l₁ : {Γ Δ : Cxt} {A A' B B' : Fma}
+    → {f : just A' ∣ Γ ⊢ A} {g : - ∣ Δ ⊢ B}
+    → ⊗r (∧l₁ {B = B'} f) g ≗ ∧l₁ (⊗r f g)
+  ⊗r∧l₂ : {Γ Δ : Cxt} {A A' B B' : Fma}
+    → {f : just B' ∣ Γ ⊢ A} {g : - ∣ Δ ⊢ B}
+    → ⊗r (∧l₂ {A = A'} f) g ≗ ∧l₂ (⊗r f g)
+  ∧rpass : {Γ : Cxt} {A A' B : Fma}
+    → {f : just A' ∣ Γ ⊢ A} {g : just A' ∣ Γ ⊢ B}
+    → ∧r (pass f) (pass g) ≗ pass (∧r f g)
+  ∧rIl : {Γ : Cxt} {A B : Fma}
+    → {f : - ∣ Γ ⊢ A} {g : - ∣ Γ ⊢ B}
+    → ∧r (Il f) (Il g) ≗ Il (∧r f g) 
+  ∧r⊗l : {Γ : Cxt} {A A' B B' : Fma}
+    → {f : just A' ∣ B' ∷ Γ ⊢ A} {g : just A' ∣ B' ∷ Γ ⊢ B}
+    → ∧r (⊗l f) (⊗l g) ≗ ⊗l (∧r f g)
+  ∧r∧l₁ : {Γ : Cxt} {A A' B B' : Fma}
+    → {f : just A' ∣ Γ ⊢ A} {g : just A' ∣ Γ ⊢ B}
+    → ∧r (∧l₁ {B = B'} f) (∧l₁ g) ≗ ∧l₁ (∧r f g)
+  ∧r∧l₂ : {Γ : Cxt} {A A' B B' : Fma}
+    → {f : just B' ∣ Γ ⊢ A} {g : just B' ∣ Γ ⊢ B}
+    → ∧r (∧l₂ {A = A'} f) (∧l₂ g) ≗ ∧l₂ (∧r f g)
+
+≡to≗ : {S : Stp} {Γ : Cxt} {C : Fma}
+  → {f g : S ∣ Γ ⊢ C}
+  → f ≡ g
+  → f ≗ g
+≡to≗ refl = refl
