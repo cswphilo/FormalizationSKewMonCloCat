@@ -18,7 +18,6 @@ open import Utilities
 open import Formulae1 
 open import SeqCalc1
 open import Focusing1
--- open import Eqfocus
 
 fT2f : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
   → (f : t ∣ S ∣ Γ ⊢fT C)
@@ -65,26 +64,18 @@ emb-pT-untagP : {S : Irr} {Γ : Cxt}
   → (f : Σ Tag (λ t → Σ Pos (λ C → (t ∣ S ∣ Γ ⊢pT C))))
   → Σ Pos (λ C → irr S ∣ Γ ⊢li C) 
 emb-pT-untagP (t , C , f) = C , p2li (untagP f)
--- emb-pT-untagP (E , .(` _ , tt) , f2pT ax) = {!   !}
--- emb-pT-untagP (E , .(I , tt) , f2pT Ir) = {!   !}
--- emb-pT-untagP (E , .(_ ⊗ _ , tt) , f2pT (⊗rT l ok eq f g)) = {!   !}
--- emb-pT-untagP (L , C , f) = {!   !}
--- emb-pT-untagP (R , C , f) = {!   !}
--- emb-pT-untagP (P , C , f) = {!   !}
 
 emb-pT-untagP-fs-eq : {S : Irr} {Γ : Cxt}
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢pT_ t S Γ))))
   → mapList (λ x → pos (proj₁ x)) (mapList (λ x → emb-pT-untagP x) fs) ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs
 emb-pT-untagP-fs-eq [] = refl
 emb-pT-untagP-fs-eq (x ∷ fs) = refl
--- {-# REWRITE emb-pT-untagP-fs-eq #-}
 
 emb-pT-p2li'-untagP'-fs-eq : {S : Irr} {Γ : Cxt}
   → (fs : List (Σ Tag (λ t → Σ (Σ Fma isPos) (_∣_∣_⊢pT_ t S Γ))))
   → mapList emb-pT-untagP fs ≡ mapList (λ x → p2li' (untagP' x)) fs
 emb-pT-p2li'-untagP'-fs-eq [] = refl
 emb-pT-p2li'-untagP'-fs-eq (x ∷ fs) = refl
--- {-# REWRITE emb-pT-p2li'-untagP'-fs-eq #-}
 
 emb-pT-untagP-pass : {Γ : Cxt} {A : Fma}
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢pT_ t (- , tt) (A ∷ Γ)))))
@@ -298,7 +289,6 @@ check-focus-ok (f2pT (∧l₂T f)) ((.R , C , f2pT (∧l₂T f₁)) ∷ fs) ok |
 
 
 -- `focused derivations are in normal form
-
 mutual
   focusemb-∧rT* : {l : List Tag} {S : Irr} {Γ : Cxt} {A : Fma}
     → {Φ : List Fma} 

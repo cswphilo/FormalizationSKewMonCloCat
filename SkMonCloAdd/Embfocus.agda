@@ -1,4 +1,4 @@
-{-# OPTIONS --rewriting --allow-unsolved-metas #-}
+{-# OPTIONS --rewriting #-}
 
 module Embfocus where
 
@@ -29,11 +29,6 @@ fsDist-seq [] (x₁ ∷ Ψ) (x ∷ fs) eq with fsDist-seq [] Ψ fs (proj₂ (inj
 ... | x₂ ∷ [] , x₃ ∷ fs'' , refl , refl , refl = x ∷ [] , x₂ ∷ x₃ ∷ fs'' , refl , cong (λ x → x ∷ []) (proj₁ (inj∷ eq)) , refl
 fsDist-seq (x₁ ∷ Φ) Ψ (x ∷ fs) eq with fsDist-seq Φ Ψ fs (proj₂ (inj∷ eq))
 ... | x₂ ∷ fs' , x₃ ∷ fs'' , refl , refl , refl = x ∷ x₂ ∷ fs' , x₃ ∷ fs'' , refl , cong (λ x → x ∷ proj₁ (proj₁ x₂) ∷ mapList (λ x₄ → proj₁ (proj₁ x₄)) fs') (proj₁ (inj∷ eq)) , refl
--- fsDist-seq [] .(mapList (λ x₁ → pos (proj₁ x₁)) (x ∷ fs)) (x ∷ fs) ? = ? -- [] , x ∷ fs , refl , refl , refl
--- fsDist-seq (x₁ ∷ Φ) Ψ (x ∷ fs) eq = ?
--- with inj∷ eq
--- ... | refl , eq1 with fsDist-seq Φ Ψ fs eq1
--- ... | fs' , fs'' , refl , refl , refl = x ∷ fs' , fs'' , refl , refl , refl
 
 fsDist-seq-refl : (S : Stp) (Γ : Cxt) {A B : Pos}
   → {f : S ∣ Γ ⊢ pos A} {g : S ∣ Γ ⊢ pos B}
@@ -110,12 +105,6 @@ emb-riT∧r* ((.E , .(I , tt) , f2pT Ir) ∷ []) stop refl refl = refl
 emb-riT∧r* ((.E , .(_ ⊗ _ , tt) , f2pT (⊗rT l ok refl f g)) ∷ []) stop refl refl = refl
 emb-riT∧r* ((.L , C , f2pT (∧l₁T f)) ∷ []) stop refl refl = refl
 emb-riT∧r* ((.R , C , f2pT (∧l₂T f)) ∷ []) stop refl refl = refl
--- emb-riT∧r* fs (conj {Φ} {Ψ} SF1 SF2) eq with fsDist-white Φ Ψ fs eq
--- emb-riT∧r* {S} {Γ} .(((C , f) ∷ fs') ++ (C' , f') ∷ fs'') (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs')} {.(mapList (λ x → proj₁ (proj₁ x)) fs'')} SF1 SF2) refl | (C , f) ∷ fs' , (C' , f') ∷ fs'' , refl , refl , refl 
---   rewrite fsDist-seq-refl S Γ {C} {C'} {emb-li f} {emb-li f'} (mapList (λ z → proj₁ z , emb-li (proj₂ z)) fs') (mapList (λ z → proj₁ z , emb-li (proj₂ z)) fs'') = 
---     ∧r (emb-riT∧r* ((C , f) ∷ fs') SF1 refl) (emb-riT∧r* ((C' , f') ∷ fs'') SF2 refl)
--- emb-riT∧r* ((C , f) ∷ []) stop refl = refl
-
 
 ⊗l-inv-fs++ : {A B : Fma} {Γ : Cxt}
   → (fs gs : List (Σ Pos (λ P → just (A ⊗ B) ∣ Γ ⊢li P)))
@@ -261,8 +250,6 @@ emb⊗r : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
   → emb-ri (⊗r-ri f g) ≗ ⊗r (emb-ri f) (emb-ri g)
 emb⊗r f g with f2fs f
 ... | (C , f') ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ x₁)) ((C , f') ∷ fs)) , refl , SF , refl = embgen⊗r-li f' fs SF g ∙ ~ (⊗r (emb∧r* ((C , f') ∷ fs) SF refl) refl)
--- embgen⊗r-li' f f' fs SF g
--- (C , f₁) ∷ fs , SF = embgen⊗r-li' f f₁ fs SF g
 
 emb⊗l : {Γ : Cxt} {A B C : Fma}
   → (f : just A ∣ B ∷ Γ ⊢ri C)

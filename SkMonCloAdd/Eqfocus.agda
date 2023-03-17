@@ -22,14 +22,13 @@ open import Focusing1
 pass'-li : {Γ : Cxt} {A : Fma}
  → Σ Pos (λ C → just A ∣ Γ ⊢li C) 
  → Σ Pos (λ C → - ∣ A ∷ Γ ⊢li C)
-pass'-li (C , f) = C , p2li (pass f) -- C , pass f
+pass'-li (C , f) = C , p2li (pass f)
 
 pass'-li-fs-eq : {Γ : Cxt} {A : Fma}
   → (fs : List (Σ Pos (λ C → just A ∣ Γ ⊢li C)))
   → mapList (λ x → pos (proj₁ x)) (mapList pass'-li fs) ≡ mapList (λ x → pos (proj₁ x)) fs
 pass'-li-fs-eq [] = refl
 pass'-li-fs-eq ((C , f) ∷ fs) = cong₂ _∷_ refl (pass'-li-fs-eq fs)
--- {-# REWRITE pass'-li-fs-eq #-}
 
 pass-ri∧r* : {Γ : Cxt} {A A' : Fma}
   → {Φ : List Fma}
@@ -146,13 +145,6 @@ IlIl-inv-eq-fs ((C , f) ∷ fs) = cong₂ _∷_ refl (IlIl-inv-eq-fs fs)
   → Σ Pos (λ C → just (A ∧ B) ∣ Γ ⊢li C)
 ∧l₁'-li (C , f) = C , p2li (f2p (∧l₁ f))
 
--- ∧l₁-fs-eq : {A B : Fma} {Γ : Cxt}
---   → (fs : List (Σ Pos (λ C → just A ∣ Γ ⊢li C)))
---   → mapList (λ x → pos (proj₁ x)) (mapList (∧l₁'-li {B = B}) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
--- ∧l₁-fs-eq [] = refl
--- ∧l₁-fs-eq ((C , f) ∷ fs) = cong₂ _∷_ refl (∧l₁-fs-eq fs)
--- {-# REWRITE ∧l₁-fs-eq #-}
-
 ∧l₁-ri∧r* : {Γ : Cxt} {A A' B' : Fma}
   → {Φ : List Fma}
   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A') Γ)))
@@ -185,13 +177,6 @@ check-focus-all-∧l₁ {B = B} f ((C , f') ∷ fs) rewrite check-focus-all-∧l
   → Σ Pos (λ C → just B ∣ Γ ⊢li C)
   → Σ Pos (λ C → just (A ∧ B) ∣ Γ ⊢li C)
 ∧l₂'-li (C , f) = C , p2li (f2p (∧l₂ f))
-
--- ∧l₂-fs-eq : {A B : Fma} {Γ : Cxt}
---   → (fs : List (Σ Pos (λ C → just B ∣ Γ ⊢li C)))
---   → mapList (λ x → pos (proj₁ x)) (mapList (∧l₂'-li {A = A}) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
--- ∧l₂-fs-eq [] = refl
--- ∧l₂-fs-eq ((C , f) ∷ fs) = cong₂ _∷_ refl (∧l₂-fs-eq fs)
--- {-# REWRITE ∧l₂-fs-eq #-}
 
 ∧l₂-ri∧r* : {Γ : Cxt} {A A' B' : Fma}
   → {Φ : List Fma}
